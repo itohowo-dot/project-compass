@@ -5,7 +5,7 @@ import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/comp
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { AlertTriangle } from "lucide-react";
+import { AlertTriangle, CheckCircle2 } from "lucide-react";
 import { useWallet } from "@/contexts/WalletContext";
 
 const MOCK_BTC_USD = 97500;
@@ -45,7 +45,12 @@ export function StepAmount({ form }: Props) {
         name="amount"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Amount (sBTC)</FormLabel>
+            <FormLabel className="flex items-center gap-1.5">
+              Amount (sBTC)
+              {typeof amount === "number" && amount > 0 && !exceedsBalance && (
+                <CheckCircle2 className="h-3.5 w-3.5 text-primary animate-in fade-in" />
+              )}
+            </FormLabel>
             <FormControl>
               <Input
                 type="number"

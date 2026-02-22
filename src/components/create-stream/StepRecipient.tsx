@@ -91,7 +91,12 @@ export function StepRecipient({ form }: Props) {
         name="recipientAddress"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Stacks Address</FormLabel>
+            <FormLabel className="flex items-center gap-1.5">
+              Stacks Address
+              {/^SP[A-Z0-9]{38,}$/.test(form.watch("recipientAddress") || "") && (
+                <CheckCircle2 className="h-3.5 w-3.5 text-primary animate-in fade-in" />
+              )}
+            </FormLabel>
             <FormControl>
               <div className="relative">
                 <Input
