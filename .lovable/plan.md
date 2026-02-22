@@ -1,23 +1,44 @@
 
 
-# Fix History Page Tabs on 390px Mobile -- Take 3
+# Refactor Transactions View: Card Layout on Mobile
 
 ## Problem
-At 390px viewport width, there's roughly 358px of usable space. Four tabs ("All 5", "Active 3", "Completed 1", "Cancelled 1") with badges simply cannot fit -- each needs ~85-95px, totaling ~350-380px with gaps, causing overflow.
+On 390px mobile, the transactions table overflows horizontally, clipping "Date" and "Tx Hash" columns. Users must scroll horizontally which is poor UX.
 
 ## Solution
-Use a combined approach:
-1. **Hide badges on mobile** -- badges are informative but not essential; removing them on narrow screens saves ~30px per tab
-2. **Keep reduced padding** (`px-2 sm:px-3`) to maximize space
-3. **Keep scrollbar hidden and overflow-x-auto** as a safety net for screens smaller than 390px
+Show a **card-based layout on mobile** (`< sm`) and keep the **existing table on desktop** (`>= sm`). Each card stacks key info vertically: type badge + amount on top row, stream link + date on second row, tx hash + counterparty on third row.
 
 ## Changes
 
-**File: `src/pages/History.tsx`** (lines 168-172)
-- Wrap each `Badge` inside the tabs with `hidden sm:inline-flex` so badges only appear on screens >= 640px
-- This reduces each tab to just the text label ("All", "Active", "Completed", "Cancelled"), which easily fits at 390px
+### File: `src/pages/History.tsx`
 
-The tab text alone at `px-2` padding: ~40px + ~55px + ~85px + ~80px = ~260px, well within 358px.
+**1. Loading skeleton** (lines 201-213): Add a mobile-friendly skeleton variant using `sm:hidden` / `hidden sm:block` to show card skeletons on mobile and row skeletons on desktop.
 
-On `sm:` and above, badges reappear and padding increases, restoring the full desktop experience.
+**2. Transaction rendering** (lines 237-297): Replace the single `<Table>` block with two variants:
+- **Mobile cards** (`sm:hidden`): A `div` with stacked cards for each transaction, showing:
+  - Row 1: Type badge (left) + Amount in mono font (right)
+  - Row 2: Stream link (left) + Date (right)  
+  - Row 3: Counterparty (left) + Tx hash with external link icon (right)
+  - Cards separated by borders, wrapped in a rounded border container
+- **Desktop table** (`hidden sm:block`): The existing `<Table>` markup, unchanged
+
+**3. Pagination** (lines 299-330): No changes needed -- pagination already works responsively.
+
+## Technical Details
+
+The card markup per transaction will look roughly like:
+
+```text
++--------------------------------------+
+| [Created]              0.5000 sBTC   |
+| Stream #1        Jan 15, 2025        |
+| SP2J...abc         0x1a2b...  [ext]  |
++--------------------------------------+
+```
+
+- Uses existing `typeConfig` for badge styling
+- Reuses `formatAddress`, `format` from date-fns
+- Wrapped in the same `rounded-lg border border-border/50` container as the table
+- Individual cards use `border-b border-border/50 last:border-0` for separation
+- No new components or dependencies needed
 
