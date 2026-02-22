@@ -12,6 +12,7 @@ import { StepRecipient } from "@/components/create-stream/StepRecipient";
 import { StepAmount } from "@/components/create-stream/StepAmount";
 import { StepDuration } from "@/components/create-stream/StepDuration";
 import { StepReview } from "@/components/create-stream/StepReview";
+import { StepSuccess } from "@/components/create-stream/StepSuccess";
 import { createStreamSchema, recipientSchema, amountSchema, durationSchema, type CreateStreamFormValues } from "@/lib/create-stream-schema";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, ArrowRight } from "lucide-react";
@@ -62,8 +63,8 @@ export default function CreateStream() {
     toast({ title: "Stream Created! 🎉", description: "Your payment stream is now active." });
     setIsSubmitting(false);
     setShowConfetti(true);
-    await new Promise((r) => setTimeout(r, 2000));
-    navigate("/dashboard");
+    setDirection(1);
+    setStep(5);
   };
 
   const stepContent = () => {
@@ -72,6 +73,7 @@ export default function CreateStream() {
       case 2: return <StepAmount form={form} />;
       case 3: return <StepDuration form={form} />;
       case 4: return <StepReview form={form} isSubmitting={isSubmitting} onConfirmSubmit={form.handleSubmit(onSubmit)} />;
+      case 5: return <StepSuccess form={form} />;
     }
   };
 
@@ -79,7 +81,7 @@ export default function CreateStream() {
     <DashboardLayout>
       {showConfetti && <Confetti onComplete={() => setShowConfetti(false)} />}
       <div className="max-w-lg mx-auto">
-        <StepIndicator currentStep={step} />
+        {step < 5 && <StepIndicator currentStep={step} />}
 
         <Card className="gradient-card border-border/50">
           <CardContent className="p-6">
@@ -102,7 +104,7 @@ export default function CreateStream() {
                   </motion.div>
                 </AnimatePresence>
 
-                {step < 4 && (
+                {step < 4 && step < 5 && (
                   <div className="flex items-center justify-between mt-8">
                     <Button type="button" variant="ghost" onClick={() => { setDirection(-1); setStep((s) => Math.max(s - 1, 1)); }} disabled={step === 1}>
                       <ArrowLeft className="h-4 w-4 mr-1" />Back
