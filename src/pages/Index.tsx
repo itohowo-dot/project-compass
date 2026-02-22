@@ -6,6 +6,7 @@ import { AnimatedNumber } from "@/components/AnimatedNumber";
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/components/ui/collapsible";
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
 import { StreamVisualization } from "@/components/StreamVisualization";
+import { ThemePreview } from "@/components/ThemePreview";
 import { useState } from "react";
 
 const FEATURES = [
@@ -144,6 +145,14 @@ export default function Index() {
             transition={{ duration: 0.5, delay: 0.5 }}
           >
             <StreamVisualization />
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.6 }}
+          >
+            <ThemePreview />
           </motion.div>
         </div>
       </header>
