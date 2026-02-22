@@ -45,13 +45,21 @@ export function StepIndicator({ currentStep }: Props) {
       <div className="mt-4">
         <div className="h-1.5 w-full rounded-full bg-border overflow-hidden">
           <div
-            className="h-full rounded-full gradient-primary transition-all duration-300 ease-out"
+            className={`h-full rounded-full gradient-primary transition-all duration-300 ease-out ${
+              progress === 100 ? "shadow-[0_0_8px_hsl(var(--primary)/0.4)] animate-pulse" : ""
+            }`}
             style={{ width: `${progress}%` }}
           />
         </div>
         <div className="flex justify-between mt-1.5 text-[10px] sm:text-xs text-muted-foreground">
           <span>Step {currentStep} of {steps.length}</span>
-          <span>{progress}%</span>
+          {progress === 100 ? (
+            <span className="text-primary font-medium flex items-center gap-1">
+              <Check className="h-3 w-3" /> Complete
+            </span>
+          ) : (
+            <span>{progress}%</span>
+          )}
         </div>
       </div>
     </div>
