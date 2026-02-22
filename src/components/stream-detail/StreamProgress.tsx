@@ -1,0 +1,45 @@
+import { Stream, getProgress, formatAddress } from "@/lib/mock-data";
+import { ArrowRight } from "lucide-react";
+
+interface Props {
+  stream: Stream;
+}
+
+export function StreamProgress({ stream }: Props) {
+  const progress = getProgress(stream);
+
+  return (
+    <div className="space-y-4">
+      {/* Sender → Recipient */}
+      <div className="flex items-center justify-between text-sm">
+        <div>
+          <p className="text-xs text-muted-foreground">Sender</p>
+          <p className="font-mono">{formatAddress(stream.sender)}</p>
+        </div>
+        <ArrowRight className="h-4 w-4 text-muted-foreground" />
+        <div className="text-right">
+          <p className="text-xs text-muted-foreground">Recipient</p>
+          <p className="font-mono">{formatAddress(stream.recipient)}</p>
+        </div>
+      </div>
+
+      {/* Large progress bar */}
+      <div className="relative h-4 w-full rounded-full bg-secondary overflow-hidden">
+        <div
+          className={`h-full rounded-full transition-all duration-700 ${
+            stream.status === "active" ? "gradient-primary" : stream.status === "completed" ? "bg-success" : "bg-destructive/60"
+          }`}
+          style={{ width: `${progress}%` }}
+        />
+        {stream.status === "active" && (
+          <div className="absolute inset-0 overflow-hidden rounded-full">
+            <div className="h-full w-1/3 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shimmer"
+                 style={{ backgroundSize: "200% 100%" }} />
+          </div>
+        )}
+      </div>
+
+      <p className="text-center text-2xl font-bold font-mono">{progress.toFixed(1)}%</p>
+    </div>
+  );
+}
