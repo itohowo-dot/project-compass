@@ -1,43 +1,36 @@
 
-
-# Confirmation Dialog and Fee Display Fix
+# Add Progress Bar to Step Indicator
 
 ## Overview
 
-Two changes: (1) add an alert dialog that appears when the user clicks "Create Stream" on the review step, requiring explicit confirmation before submission, and (2) fix the network fee USD display to show meaningful precision for very small dollar amounts.
+Add an animated progress bar below the step circles in the Create Stream form that shows overall completion percentage (25% per step). This gives users a clear visual sense of how far along they are.
+
+## Design
+
+A thin horizontal progress bar will be added below the existing step indicator row. It will:
+- Show 25% filled per completed/current step (Step 1 = 25%, Step 2 = 50%, Step 3 = 75%, Step 4 = 100%)
+- Use the existing `gradient-primary` styling for consistency with the checkmark circles
+- Animate smoothly when advancing or going back using a CSS transition
+- Display "Step X of 4" text with the percentage on the right
 
 ## Changes
 
-### 1. Confirmation Dialog (`src/components/create-stream/StepReview.tsx`)
+### `src/components/create-stream/StepIndicator.tsx`
 
-Replace the direct submit button with an `AlertDialog` trigger:
-
-- The "Create Stream" button opens an `AlertDialog` instead of submitting directly
-- Dialog shows a summary: "You are about to create a stream of {amount} sBTC to {recipient}. This action will submit a transaction to the Stacks network."
-- Two buttons: "Cancel" (closes dialog) and "Confirm & Create" (triggers form submission)
-- The "Confirm & Create" button shows the loading spinner when submitting
-- Uses existing `AlertDialog` components from `@/components/ui/alert-dialog`
-
-### 2. Fix Fee USD Display (`src/components/create-stream/StepReview.tsx`)
-
-The current code uses `toLocaleString` with `style: "currency"` which rounds `0.0000222` to `$0.00`. Fix by:
-
-- Calculating the raw USD value (`MOCK_FEE * MOCK_STX_USD`)
-- If the value is less than $0.01, display it with enough significant digits (e.g., `~$0.000022`)
-- If >= $0.01, keep the standard currency format
-
-## Files Changed
-
-| File | Change |
-|------|--------|
-| `src/components/create-stream/StepReview.tsx` | Add AlertDialog confirmation before submit; fix fee USD formatting for small amounts |
-| `src/pages/CreateStream.tsx` | Minor adjustment -- pass an `onSubmit` callback prop to StepReview so the dialog can trigger form submission programmatically |
+- Calculate progress percentage: `(currentStep / 4) * 100`
+- Add a progress bar section below the step circles:
+  - A full-width `bg-border` track (thin, rounded)
+  - An inner `bg-primary` fill bar with `transition-all duration-300` for smooth animation
+  - A small text row showing "Step X of 4" on the left and "XX%" on the right
+- No new dependencies needed -- uses simple div-based progress bar with Tailwind classes
 
 ## Technical Details
 
-- Uses existing `AlertDialog`, `AlertDialogTrigger`, `AlertDialogContent`, `AlertDialogHeader`, `AlertDialogTitle`, `AlertDialogDescription`, `AlertDialogFooter`, `AlertDialogCancel`, `AlertDialogAction` from `@/components/ui/alert-dialog` (already installed)
-- The "Create Stream" button becomes `type="button"` and acts as the `AlertDialogTrigger`
-- The `AlertDialogAction` calls the form's `handleSubmit(onSubmit)` to trigger validation and submission
-- For fee formatting: use a helper that checks if the value is below 0.01 and formats with `toFixed(6)` trimming trailing zeros, otherwise uses standard currency formatting
-- No new dependencies required
+| File | Change |
+|------|--------|
+| `src/components/create-stream/StepIndicator.tsx` | Add progress bar track + animated fill below step circles, plus "Step X of 4 -- XX%" text |
 
+- Progress calculation: `const progress = (currentStep / steps.length) * 100`
+- The bar uses `style={{ width: \`${progress}%\` }}` with `transition-all duration-300 ease-out` for smooth animation
+- Keeps the existing step circles and connector lines unchanged
+- Responsive: works on all viewports since it's a simple full-width bar
