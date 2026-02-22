@@ -1,9 +1,13 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Stream, getWithdrawable, getRemaining, getTimeLeft, getDailyRate } from "@/lib/mock-data";
+import { Stream, getWithdrawable, getRemaining, getTimeLeft, getDailyRate, MOCK_BTC_USD } from "@/lib/mock-data";
 import { AnimatedNumber } from "@/components/AnimatedNumber";
 
 interface Props {
   stream: Stream;
+}
+
+function formatUsd(sbtc: number): string {
+  return `≈ $${(sbtc * MOCK_BTC_USD).toLocaleString("en-US", { maximumFractionDigits: 0 })}`;
 }
 
 export function StreamQuickStats({ stream }: Props) {
@@ -20,13 +24,14 @@ export function StreamQuickStats({ stream }: Props) {
         <CardTitle className="text-base">Quick Stats</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-2 gap-4" aria-live="polite">
           {numericStats.map((s) => (
             <div key={s.label}>
               <p className="text-xs text-muted-foreground">{s.label}</p>
               <p className="text-sm font-mono font-medium">
                 <AnimatedNumber value={s.value} decimals={s.decimals} suffix={s.suffix} duration={1000} />
               </p>
+              <p className="text-xs text-muted-foreground">{formatUsd(s.value)}</p>
             </div>
           ))}
           <div>

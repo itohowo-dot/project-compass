@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { Droplets, LayoutDashboard, PlusCircle, Clock, Menu } from "lucide-react";
+import { Droplets, LayoutDashboard, PlusCircle, Clock, Settings, Menu } from "lucide-react";
 import { WalletButton } from "./WalletButton";
 import { ThemeToggle } from "./ThemeToggle";
 import { cn } from "@/lib/utils";
@@ -13,6 +13,7 @@ const NAV_LINKS = [
   { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { to: "/create", label: "Create", icon: PlusCircle },
   { to: "/history", label: "History", icon: Clock },
+  { to: "/settings", label: "Settings", icon: Settings },
 ];
 
 export function Navbar() {

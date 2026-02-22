@@ -3,7 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ArrowUpRight, ArrowDownLeft, Eye } from "lucide-react";
-import { Stream, getProgress, getTimeLeft, getWithdrawable, getRemaining, formatAddress } from "@/lib/mock-data";
+import { Stream, getProgress, getTimeLeft, getWithdrawable, getRemaining, formatAddress, MOCK_BTC_USD } from "@/lib/mock-data";
 
 const statusConfig: Record<string, { label: string; className: string }> = {
   active: { label: "Active", className: "bg-amber-500/20 text-amber-400 border-amber-500/30" },
@@ -25,7 +25,10 @@ export function StreamCard({ stream }: Props) {
   const counterparty = isOutgoing ? stream.recipient : stream.sender;
 
   return (
-    <Card className="gradient-card border-border/50 hover:shadow-[0_8px_30px_hsl(36_100%_50%/0.08)] hover:-translate-y-0.5 transition-all duration-300 group">
+    <Card
+      className="gradient-card border-border/50 hover:shadow-[0_8px_30px_hsl(36_100%_50%/0.08)] hover:-translate-y-0.5 transition-all duration-300 group"
+      aria-label={`${isOutgoing ? "Outgoing" : "Incoming"} stream of ${stream.totalAmount} sBTC, ${stream.status}`}
+    >
       <CardContent className="p-5">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
@@ -46,8 +49,14 @@ export function StreamCard({ stream }: Props) {
           </Badge>
         </div>
 
-        {/* Progress bar */}
-        <div className="relative h-2 w-full rounded-full bg-secondary overflow-hidden mb-3">
+        <div
+          className="relative h-2 w-full rounded-full bg-secondary overflow-hidden mb-3"
+          role="progressbar"
+          aria-valuenow={Math.round(progress)}
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-label={`Stream progress: ${progress.toFixed(1)}% vested`}
+        >
           <div
             className={`h-full rounded-full transition-all duration-500 ${
               stream.status === "active" ? "gradient-primary" : stream.status === "completed" ? "bg-success" : "bg-destructive/60"
@@ -71,10 +80,12 @@ export function StreamCard({ stream }: Props) {
           <div>
             <p className="text-xs text-muted-foreground">Vested</p>
             <p className="text-sm font-mono font-medium">{stream.vestedAmount.toFixed(4)} sBTC</p>
+            <p className="text-xs text-muted-foreground">≈ ${(stream.vestedAmount * MOCK_BTC_USD).toLocaleString("en-US", { maximumFractionDigits: 0 })}</p>
           </div>
           <div>
             <p className="text-xs text-muted-foreground">Remaining</p>
             <p className="text-sm font-mono font-medium">{remaining.toFixed(4)} sBTC</p>
+            <p className="text-xs text-muted-foreground">≈ ${(remaining * MOCK_BTC_USD).toLocaleString("en-US", { maximumFractionDigits: 0 })}</p>
           </div>
         </div>
 
