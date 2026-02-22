@@ -165,11 +165,11 @@ export default function History() {
         {/* === STREAMS VIEW === */}
         {view === "streams" && (
           <Tabs value={tab} onValueChange={setTab}>
-            <TabsList className="grid grid-cols-4 sm:inline-flex sm:w-auto">
-              <TabsTrigger value="all">All <Badge variant="secondary" className="ml-1.5 text-xs">{counts.all}</Badge></TabsTrigger>
-              <TabsTrigger value="active">Active <Badge variant="secondary" className="ml-1.5 text-xs">{counts.active}</Badge></TabsTrigger>
-              <TabsTrigger value="completed">Completed <Badge variant="secondary" className="ml-1.5 text-xs">{counts.completed}</Badge></TabsTrigger>
-              <TabsTrigger value="cancelled">Cancelled <Badge variant="secondary" className="ml-1.5 text-xs">{counts.cancelled}</Badge></TabsTrigger>
+            <TabsList className="flex w-full overflow-x-auto sm:inline-flex sm:w-auto">
+              <TabsTrigger value="all" className="flex-shrink-0">All <Badge variant="secondary" className="ml-1.5 text-xs">{counts.all}</Badge></TabsTrigger>
+              <TabsTrigger value="active" className="flex-shrink-0">Active <Badge variant="secondary" className="ml-1.5 text-xs">{counts.active}</Badge></TabsTrigger>
+              <TabsTrigger value="completed" className="flex-shrink-0">Completed <Badge variant="secondary" className="ml-1.5 text-xs">{counts.completed}</Badge></TabsTrigger>
+              <TabsTrigger value="cancelled" className="flex-shrink-0">Cancelled <Badge variant="secondary" className="ml-1.5 text-xs">{counts.cancelled}</Badge></TabsTrigger>
             </TabsList>
 
             {["all", "active", "completed", "cancelled"].map((t) => (
