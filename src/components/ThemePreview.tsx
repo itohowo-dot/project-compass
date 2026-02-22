@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Sun, Moon } from "lucide-react";
 
@@ -31,17 +31,15 @@ const DARK = {
 export function ThemePreview() {
   const [isDark, setIsDark] = useState(true);
 
-  useEffect(() => {
-    const interval = setInterval(() => setIsDark((d) => !d), 3000);
-    return () => clearInterval(interval);
-  }, []);
-
   const t = isDark ? DARK : LIGHT;
 
   return (
     <div className="flex flex-col items-center gap-3 mt-8">
       <motion.div
-        className="w-[280px] sm:w-[300px] rounded-xl overflow-hidden shadow-lg"
+        className="w-[280px] sm:w-[300px] rounded-xl overflow-hidden shadow-lg cursor-pointer"
+        onClick={() => setIsDark((d) => !d)}
+        whileHover={{ scale: 1.02 }}
+        whileTap={{ scale: 0.98 }}
         animate={{
           backgroundColor: t.bg,
           borderColor: t.border,
@@ -127,7 +125,7 @@ export function ThemePreview() {
       </motion.div>
 
       <p className="text-xs text-muted-foreground">
-        Supports dark and light themes
+        Click to toggle theme
       </p>
     </div>
   );
