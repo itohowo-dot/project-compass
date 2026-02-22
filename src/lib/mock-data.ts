@@ -193,3 +193,36 @@ export function getStreamById(id: string): Stream | undefined {
 export function getTransactionsForStream(streamId: string): Transaction[] {
   return mockTransactions.filter((t) => t.streamId === streamId);
 }
+
+// BNS (Bitcoin Name Service) mock registry
+export const mockBnsNames: Record<string, string> = {
+  "alice.btc": "SP3FBR2AGK5H9QBDH3EEN6DF8EK8JY7RX8QJ5SVTE",
+  "bob.btc": "SP2ZNGJ85ENDY6QRHQ5P2D4FXKGZWCKTB2T0Z55KS",
+  "carol.btc": "SP1HTBVD3JG9C05J7HBJTHGR0GGW7KXW28M5JS8QE",
+  "dave.btc": "SP3K8BC0PPEVCV7NZ6QSRWPQ2JE9E5B6N3PA0KR9D",
+};
+
+/** Resolve a .btc name to a Stacks address (simulated 500ms delay) */
+export async function resolveBns(name: string): Promise<string | null> {
+  await new Promise((r) => setTimeout(r, 500));
+  const lower = name.toLowerCase();
+  return mockBnsNames[lower] ?? null;
+}
+
+/** Reverse-lookup: get the BNS name for a Stacks address, if one exists */
+export function reverseBns(address: string): string | null {
+  for (const [name, addr] of Object.entries(mockBnsNames)) {
+    if (addr === address) return name;
+  }
+  return null;
+}
+
+export interface RecentRecipient {
+  label: string;
+  address: string;
+}
+
+export const recentRecipients: RecentRecipient[] = [
+  { label: "alice.btc", address: "SP3FBR2AGK5H9QBDH3EEN6DF8EK8JY7RX8QJ5SVTE" },
+  { label: "bob.btc", address: "SP2ZNGJ85ENDY6QRHQ5P2D4FXKGZWCKTB2T0Z55KS" },
+];
