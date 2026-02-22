@@ -1,18 +1,17 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Stream, getWithdrawable, getRemaining, getTimeLeft, getDailyRate } from "@/lib/mock-data";
+import { AnimatedNumber } from "@/components/AnimatedNumber";
 
 interface Props {
   stream: Stream;
 }
 
 export function StreamQuickStats({ stream }: Props) {
-  const stats = [
-    { label: "Vested", value: `${stream.vestedAmount.toFixed(4)} sBTC` },
-    { label: "Withdrawn", value: `${stream.withdrawnAmount.toFixed(4)} sBTC` },
-    { label: "Withdrawable", value: `${getWithdrawable(stream).toFixed(4)} sBTC` },
-    { label: "Remaining", value: `${getRemaining(stream).toFixed(4)} sBTC` },
-    { label: "Time Left", value: getTimeLeft(stream) },
-    { label: "Daily Rate", value: `${getDailyRate(stream).toFixed(6)} sBTC` },
+  const numericStats = [
+    { label: "Vested", value: stream.vestedAmount, decimals: 4, suffix: " sBTC" },
+    { label: "Withdrawn", value: stream.withdrawnAmount, decimals: 4, suffix: " sBTC" },
+    { label: "Withdrawable", value: getWithdrawable(stream), decimals: 4, suffix: " sBTC" },
+    { label: "Remaining", value: getRemaining(stream), decimals: 4, suffix: " sBTC" },
   ];
 
   return (
@@ -22,12 +21,24 @@ export function StreamQuickStats({ stream }: Props) {
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-2 gap-4">
-          {stats.map((s) => (
+          {numericStats.map((s) => (
             <div key={s.label}>
               <p className="text-xs text-muted-foreground">{s.label}</p>
-              <p className="text-sm font-mono font-medium">{s.value}</p>
+              <p className="text-sm font-mono font-medium">
+                <AnimatedNumber value={s.value} decimals={s.decimals} suffix={s.suffix} duration={1000} />
+              </p>
             </div>
           ))}
+          <div>
+            <p className="text-xs text-muted-foreground">Time Left</p>
+            <p className="text-sm font-mono font-medium">{getTimeLeft(stream)}</p>
+          </div>
+          <div>
+            <p className="text-xs text-muted-foreground">Daily Rate</p>
+            <p className="text-sm font-mono font-medium">
+              <AnimatedNumber value={getDailyRate(stream)} decimals={6} suffix=" sBTC" duration={1000} />
+            </p>
+          </div>
         </div>
       </CardContent>
     </Card>

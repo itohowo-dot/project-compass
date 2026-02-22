@@ -1,10 +1,13 @@
 import { Link } from "react-router-dom";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { StatsCards } from "@/components/dashboard/StatsCards";
+import { StatsCardsSkeleton } from "@/components/dashboard/StatsCardsSkeleton";
 import { StreamCard } from "@/components/StreamCard";
+import { StreamCardSkeleton } from "@/components/StreamCardSkeleton";
 import { Button } from "@/components/ui/button";
 import { Plus, Droplets } from "lucide-react";
 import { mockStreams } from "@/lib/mock-data";
+import { useSimulatedLoading } from "@/hooks/use-simulated-loading";
 
 function getGreeting() {
   const h = new Date().getHours();
@@ -14,21 +17,20 @@ function getGreeting() {
 }
 
 export default function Dashboard() {
+  const isLoading = useSimulatedLoading(800);
   const outgoing = mockStreams.filter((s) => s.direction === "outgoing");
   const incoming = mockStreams.filter((s) => s.direction === "incoming");
 
   return (
     <DashboardLayout>
       <div className="space-y-8">
-        {/* Greeting */}
         <div>
           <h1 className="text-2xl font-bold">{getGreeting()}, Builder 👋</h1>
           <p className="text-muted-foreground text-sm mt-1">Here's an overview of your payment streams.</p>
         </div>
 
-        <StatsCards />
+        {isLoading ? <StatsCardsSkeleton /> : <StatsCards />}
 
-        {/* Outgoing */}
         <section>
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-semibold">Outgoing Streams</h2>
@@ -36,7 +38,11 @@ export default function Dashboard() {
               <Link to="/create"><Plus className="h-4 w-4 mr-1" />Create Stream</Link>
             </Button>
           </div>
-          {outgoing.length > 0 ? (
+          {isLoading ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {[1, 2, 3].map((i) => <StreamCardSkeleton key={i} />)}
+            </div>
+          ) : outgoing.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {outgoing.map((s) => <StreamCard key={s.id} stream={s} />)}
             </div>
@@ -45,10 +51,13 @@ export default function Dashboard() {
           )}
         </section>
 
-        {/* Incoming */}
         <section>
           <h2 className="text-lg font-semibold mb-4">Incoming Streams</h2>
-          {incoming.length > 0 ? (
+          {isLoading ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {[1, 2].map((i) => <StreamCardSkeleton key={i} />)}
+            </div>
+          ) : incoming.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {incoming.map((s) => <StreamCard key={s.id} stream={s} />)}
             </div>

@@ -1,6 +1,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowUpRight, ArrowDownLeft, Activity } from "lucide-react";
 import { mockStreams } from "@/lib/mock-data";
+import { AnimatedNumber } from "@/components/AnimatedNumber";
 
 export function StatsCards() {
   const outgoing = mockStreams.filter((s) => s.direction === "outgoing" && s.status === "active");
@@ -13,21 +14,27 @@ export function StatsCards() {
   const stats = [
     {
       label: "Total Streaming",
-      value: `${totalStreaming.toFixed(4)} sBTC`,
+      value: totalStreaming,
+      decimals: 4,
+      suffix: " sBTC",
       subtitle: `${outgoing.length} outgoing streams`,
       icon: ArrowUpRight,
       iconClass: "text-primary",
     },
     {
       label: "Total Received",
-      value: `${totalReceived.toFixed(4)} sBTC`,
+      value: totalReceived,
+      decimals: 4,
+      suffix: " sBTC",
       subtitle: "Lifetime withdrawn",
       icon: ArrowDownLeft,
       iconClass: "text-accent",
     },
     {
       label: "Active Streams",
-      value: activeCount.toString(),
+      value: activeCount,
+      decimals: 0,
+      suffix: "",
       subtitle: `${outgoing.length} out · ${mockStreams.filter((s) => s.direction === "incoming" && s.status === "active").length} in`,
       icon: Activity,
       iconClass: "text-success",
@@ -43,7 +50,9 @@ export function StatsCards() {
               <span className="text-sm text-muted-foreground">{stat.label}</span>
               <stat.icon className={`h-4 w-4 ${stat.iconClass}`} />
             </div>
-            <p className="text-2xl font-bold tracking-tight font-mono">{stat.value}</p>
+            <p className="text-2xl font-bold tracking-tight font-mono">
+              <AnimatedNumber value={stat.value} decimals={stat.decimals} suffix={stat.suffix} />
+            </p>
             <p className="text-xs text-muted-foreground mt-1">{stat.subtitle}</p>
           </CardContent>
         </Card>
