@@ -27,6 +27,8 @@ export interface Transaction {
   blockHeight: number;
 }
 
+export const MOCK_BTC_USD = 97500;
+
 const USER_ADDRESS = "SP2J6ZY48GV1EZ5V2V5RB9MP66SW86PYKKQYAC0D";
 
 export const mockStreams: Stream[] = [

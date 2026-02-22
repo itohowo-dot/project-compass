@@ -23,8 +23,14 @@ export function StreamProgress({ stream }: Props) {
         </div>
       </div>
 
-      {/* Large progress bar */}
-      <div className="relative h-4 w-full rounded-full bg-secondary overflow-hidden">
+      <div
+        className="relative h-4 w-full rounded-full bg-secondary overflow-hidden"
+        role="progressbar"
+        aria-valuenow={Math.round(progress)}
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-label={`Stream progress: ${progress.toFixed(1)}% vested`}
+      >
         <div
           className={`h-full rounded-full transition-all duration-700 ${
             stream.status === "active" ? "gradient-primary" : stream.status === "completed" ? "bg-success" : "bg-destructive/60"

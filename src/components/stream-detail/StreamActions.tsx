@@ -3,7 +3,7 @@ import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Stream, getWithdrawable } from "@/lib/mock-data";
+import { Stream, getWithdrawable, MOCK_BTC_USD } from "@/lib/mock-data";
 import { useToast } from "@/hooks/use-toast";
 
 interface Props {
@@ -22,13 +22,13 @@ export function StreamActions({ stream }: Props) {
       {!isOutgoing && withdrawable > 0 && (
         <AlertDialog>
           <AlertDialogTrigger asChild>
-            <Button className="w-full">Withdraw {withdrawable.toFixed(4)} sBTC</Button>
+            <Button className="w-full">Withdraw {withdrawable.toFixed(4)} sBTC (≈ ${(withdrawable * MOCK_BTC_USD).toLocaleString("en-US", { maximumFractionDigits: 0 })})</Button>
           </AlertDialogTrigger>
           <AlertDialogContent>
             <AlertDialogHeader>
               <AlertDialogTitle>Confirm Withdrawal</AlertDialogTitle>
               <AlertDialogDescription>
-                You will withdraw {withdrawable.toFixed(4)} sBTC from this stream. This action will submit a transaction to the Stacks network.
+                You will withdraw {withdrawable.toFixed(4)} sBTC (≈ ${(withdrawable * MOCK_BTC_USD).toLocaleString("en-US", { maximumFractionDigits: 0 })}) from this stream. This action will submit a transaction to the Stacks network.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>

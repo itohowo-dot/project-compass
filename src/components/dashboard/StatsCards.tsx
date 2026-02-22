@@ -1,6 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowUpRight, ArrowDownLeft, Activity } from "lucide-react";
-import { mockStreams } from "@/lib/mock-data";
+import { mockStreams, MOCK_BTC_USD } from "@/lib/mock-data";
 import { AnimatedNumber } from "@/components/AnimatedNumber";
 
 export function StatsCards() {
@@ -42,7 +42,7 @@ export function StatsCards() {
   ];
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4" aria-live="polite">
       {stats.map((stat) => (
         <Card key={stat.label} className="gradient-card border-border/50 hover:glow-amber transition-shadow duration-300">
           <CardContent className="p-5">
@@ -53,6 +53,11 @@ export function StatsCards() {
             <p className="text-2xl font-bold tracking-tight font-mono">
               <AnimatedNumber value={stat.value} decimals={stat.decimals} suffix={stat.suffix} />
             </p>
+            {stat.decimals > 0 && (
+              <p className="text-xs text-muted-foreground mt-0.5">
+                ≈ ${(stat.value * MOCK_BTC_USD).toLocaleString("en-US", { maximumFractionDigits: 0 })}
+              </p>
+            )}
             <p className="text-xs text-muted-foreground mt-1">{stat.subtitle}</p>
           </CardContent>
         </Card>
