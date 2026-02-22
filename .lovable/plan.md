@@ -1,59 +1,36 @@
 
-
-# Add Success Screen After Stream Creation
+# Add Staggered Entrance Animation to Success Screen Summary Rows
 
 ## Overview
 
-Instead of immediately navigating to the dashboard after confetti, show a success screen that celebrates the stream creation and lets the user either view the new stream or go to the dashboard.
-
-## Current Flow
-1. User clicks "Confirm & Create"
-2. 1.5s simulated submission
-3. Toast appears
-4. Confetti plays for 2s
-5. Auto-navigate to /dashboard
-
-## New Flow
-1. User clicks "Confirm & Create"
-2. 1.5s simulated submission
-3. Toast appears + Confetti plays
-4. **Success screen appears** (step 5) with stream summary, "View Stream" button, and "Go to Dashboard" link
-5. User chooses where to navigate
+Add a subtle staggered fade-up animation to each summary row (Recipient, Amount, Duration, Est. End Date) on the success screen, so they reveal one by one for a polished effect.
 
 ## Changes
 
-### 1. New file: `src/components/create-stream/StepSuccess.tsx`
+### `src/components/create-stream/StepSuccess.tsx`
 
-A success screen component showing:
-- A large animated checkmark icon (using lucide `CheckCircle2`) with a scale-in animation via framer-motion
-- "Stream Created!" heading
-- Summary card with: recipient address, amount + USD value, duration, estimated end date
-- A mock stream ID (e.g., "stream-4") for the "View Stream" link
-- Primary button: "View Stream" linking to `/stream/stream-4`
-- Secondary button: "Back to Dashboard" linking to `/dashboard`
+Wrap the heading, subtitle, summary rows, and buttons in `motion` elements with staggered delays:
 
-### 2. Modified: `src/pages/CreateStream.tsx`
+1. Wrap the heading (`h2`) in `motion.h2` with a fade-up animation (delay: 0.3s, after the checkmark)
+2. Wrap the subtitle (`p`) in `motion.p` with fade-up (delay: 0.4s)
+3. Wrap the summary card container in `motion.div` with fade-up (delay: 0.5s)
+4. Convert each summary row `div` to `motion.div` with staggered delays (0.6s, 0.7s, 0.8s, 0.9s) -- each row slides up and fades in 100ms after the previous one
+5. Wrap the buttons container in `motion.div` with fade-up (delay: 1.0s)
 
-- Change `onSubmit` to stop auto-navigating: instead of `navigate("/dashboard")`, set `step` to 5 and trigger confetti
-- Add step 5 to `stepContent()` rendering `StepSuccess`
-- Update `StepIndicator` rendering to hide it on step 5 (success screen doesn't need step dots)
-- Hide the Back/Continue footer when `step === 5`
-- Remove the 2-second navigation delay since the user now controls when to leave
+All animations use:
+- `initial={{ opacity: 0, y: 12 }}`
+- `animate={{ opacity: 1, y: 0 }}`
+- `transition={{ duration: 0.3, ease: "easeOut", delay: X }}`
 
-### 3. Modified: `src/components/create-stream/StepIndicator.tsx`
-
-- No changes needed -- the component already receives `currentStep` and we'll simply not render it when on step 5
+This creates a cascade effect: checkmark bounces in first, then heading, subtitle, each row one by one, and finally the action buttons.
 
 ## Technical Details
 
 | File | Change |
 |------|--------|
-| `src/components/create-stream/StepSuccess.tsx` | New component with animated checkmark, stream summary, and navigation buttons |
-| `src/pages/CreateStream.tsx` | Replace auto-navigate with step 5 success screen; show confetti alongside it; hide StepIndicator on step 5 |
+| `src/components/create-stream/StepSuccess.tsx` | Convert static elements to `motion` elements with staggered delay values |
 
-- The success screen uses `framer-motion` for the checkmark scale-in animation (already a dependency)
-- Mock stream ID will be "stream-1" to link to an existing mock stream detail page
-- The confetti will play concurrently with the success screen appearing (no blocking delay)
-- The card styling matches the existing `gradient-card border-border/50` pattern
-- Form values are read from the form to display the summary on the success screen
-
+- Uses `framer-motion` (already imported)
+- No new dependencies
+- Delays are spaced 100ms apart for a subtle, not sluggish, cascade
+- Total animation sequence: ~1.3s from start to all elements visible
