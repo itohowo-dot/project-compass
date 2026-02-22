@@ -3,13 +3,13 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Sun, Moon, MousePointerClick } from "lucide-react";
 
 const LIGHT = {
-  bg: "hsl(40 40% 96%)",
-  card: "hsl(40 30% 100%)",
-  border: "hsl(40 20% 88%)",
+  bg: "hsl(40 30% 94%)",
+  card: "hsl(0 0% 100%)",
+  border: "hsl(40 15% 80%)",
   text: "hsl(30 10% 15%)",
-  muted: "hsl(30 8% 55%)",
+  muted: "hsl(30 10% 45%)",
   bar: "hsl(36 90% 54%)",
-  barBg: "hsl(40 20% 90%)",
+  barBg: "hsl(40 15% 84%)",
   dot1: "hsl(0 70% 60%)",
   dot2: "hsl(45 80% 55%)",
   dot3: "hsl(140 50% 50%)",
