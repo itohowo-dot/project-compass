@@ -1,80 +1,74 @@
 
 
-# Settings Page, USD Display, and Accessibility Improvements
+# ENS/BNS Address Lookup and Enhanced Recent Recipients
 
-## 1. Settings Page (`/settings`)
+## Overview
 
-### New file: `src/pages/Settings.tsx`
-A placeholder settings page with three sections:
+Enhance the recipient step in Create Stream with a mock BNS (Bitcoin Name Service) lookup that resolves `.btc` names to Stacks addresses, and upgrade the recent recipients list into a searchable dropdown with labels.
 
-- **Wallet Management** -- shows connected wallet address, type, balance, copy address button, and disconnect button (using existing `useWallet` context)
-- **Notification Preferences** -- toggles (using existing Switch component) for: stream completed, withdrawal received, stream cancelled, low balance alert. All state is local (no backend)
-- **Theme Settings** -- uses existing `next-themes` `useTheme()` hook with radio/toggle group to pick light/dark/system
+## Changes
 
-Layout uses `DashboardLayout` wrapper consistent with other pages.
+### 1. Mock BNS Data (`src/lib/mock-data.ts`)
 
-### Route Registration
-- Add `Settings` import and route in `src/components/AnimatedRoutes.tsx`
+Add a mock BNS registry mapping `.btc` names to Stacks addresses, plus a helper function:
 
-### Navigation Link
-- Add a Settings link (gear icon) to `NAV_LINKS` in `src/components/Navbar.tsx`
+```text
+mockBnsNames = {
+  "alice.btc"  -> SP3FBR2AGK5H9QBDH3EEN6DF8EK8JY7RX8QJ5SVTE
+  "bob.btc"    -> SP2ZNGJ85ENDY6QRHQ5P2D4FXKGZWCKTB2T0Z55KS
+  "carol.btc"  -> SP1HTBVD3JG9C05J7HBJTHGR0GGW7KXW28M5JS8QE
+  "dave.btc"   -> SP3K8BC0PPEVCV7NZ6QSRWPQ2JE9E5B6N3PA0KR9D
+}
+```
 
----
+- `resolveBns(name: string): string | null` -- looks up a `.btc` name and returns the address or null
+- `reverseBns(address: string): string | null` -- returns the BNS name for an address if one exists
 
-## 2. USD Equivalent Display
+Also add a `recentRecipients` array with label + address objects (moved out of the component):
 
-A shared constant `MOCK_BTC_USD = 97500` will be added to `src/lib/mock-data.ts` for reuse.
+```text
+[
+  { label: "alice.btc", address: "SP3FBR..." },
+  { label: "bob.btc",   address: "SP2ZNG..." },
+]
+```
 
-### Existing (already done -- no changes needed):
-- `StepAmount.tsx` already shows USD equivalent below the input
-- `StepReview.tsx` already shows USD alongside the amount
+### 2. Enhanced Recipient Step (`src/components/create-stream/StepRecipient.tsx`)
 
-### New USD additions:
-- **`StreamQuickStats.tsx`** -- add USD values next to "Vested", "Withdrawable", and "Remaining" amounts
-- **`StreamCard.tsx`** -- add a small USD value below the vested/remaining amounts
-- **`StatsCards.tsx`** -- add USD subtitle below "Total Streaming" and "Total Received" values
-- **`StreamActions.tsx`** -- show USD equivalent next to withdrawal amount in button and dialog
+**BNS Lookup:**
+- When the user types a value ending in `.btc`, debounce (300ms) and call `resolveBns()`
+- Show a resolved address badge below the input with a checkmark icon (e.g., "alice.btc resolves to SP3FBR...SVTE")
+- If resolution fails, show a subtle error message "Name not found"
+- When a BNS name resolves, set the form value to the resolved Stacks address
 
----
+**Recent Recipients Dropdown:**
+- Replace the current flat button list with a Popover-based searchable dropdown
+- Use the existing `Command` (cmdk) component for search/filter
+- Each item shows the BNS label (if available) and the truncated address
+- Clicking an item fills the form field and closes the dropdown
+- Trigger is a "Recent Recipients" button with a `Clock` icon below the address input
 
-## 3. Accessibility Improvements
+**Input Enhancement:**
+- Update placeholder to `"SP... or name.btc"`
+- Keep the existing paste button
 
-### ARIA on progress bars
-- **`StreamCard.tsx`** (line 50): add `role="progressbar"`, `aria-valuenow`, `aria-valuemin="0"`, `aria-valuemax="100"`, `aria-label`
-- **`StreamProgress.tsx`** (line 27): same treatment on the large progress bar
+### 3. Schema Update (`src/lib/create-stream-schema.ts`)
 
-### ARIA labels on stream cards
-- **`StreamCard.tsx`**: add `aria-label` on the root Card describing the stream (direction, amount, status)
+Update `recipientSchema` to also accept BNS names (`.btc` suffix) as valid input, since the component will resolve them before advancing. The regex stays as-is since the form value will be set to the resolved address, but add a note comment for clarity.
 
-### `aria-live` regions
-- **`StatsCards.tsx`**: wrap stats in `aria-live="polite"` region
-- **`StreamQuickStats.tsx`**: add `aria-live="polite"` on the stats grid
-
-### `prefers-reduced-motion`
-- **`src/index.css`**: add a `@media (prefers-reduced-motion: reduce)` block that sets `animation-duration: 0.01ms`, `transition-duration: 0.01ms`, and disables custom keyframes
-
----
-
-## 4. Quick-Select Buttons (Already Implemented)
-
-No changes needed:
-- `StepAmount.tsx` lines 56-61 already render 25%, 50%, 75%, MAX buttons
-- `StepDuration.tsx` lines 56-67 already render 7d, 14d, 30d, 90d, 1yr preset buttons
-
----
-
-## Summary of Files Changed
+## Files Changed
 
 | File | Change |
 |------|--------|
-| `src/pages/Settings.tsx` | New file -- full settings page |
-| `src/components/AnimatedRoutes.tsx` | Add Settings route |
-| `src/components/Navbar.tsx` | Add Settings nav link |
-| `src/lib/mock-data.ts` | Export `MOCK_BTC_USD` constant |
-| `src/components/stream-detail/StreamQuickStats.tsx` | USD values + aria-live |
-| `src/components/StreamCard.tsx` | USD values + ARIA labels + progressbar role |
-| `src/components/dashboard/StatsCards.tsx` | USD subtitles + aria-live |
-| `src/components/stream-detail/StreamProgress.tsx` | progressbar role + ARIA |
-| `src/components/stream-detail/StreamActions.tsx` | USD in withdraw amounts |
-| `src/index.css` | prefers-reduced-motion media query |
+| `src/lib/mock-data.ts` | Add `mockBnsNames`, `resolveBns()`, `reverseBns()`, and `recentRecipients` array |
+| `src/components/create-stream/StepRecipient.tsx` | BNS lookup with debounce, resolved address display, searchable recent recipients dropdown using Command/Popover |
+
+## Technical Details
+
+- BNS lookup uses a simulated 500ms async delay to mimic network latency
+- Debounce (300ms) prevents lookup on every keystroke
+- The Command component from cmdk is already installed and styled
+- The Popover component is already available
+- No schema change needed since the resolved Stacks address is what gets set in the form
+- All data remains mock -- no real BNS API calls
 
