@@ -1,45 +1,44 @@
 
 
-# Add Transaction Log to History Page
+# Add Pagination to Transaction Log
 
 ## Overview
-The History page currently shows stream cards filtered by status. This enhancement adds a second view mode -- a **Transaction Log** -- that shows all individual transactions (created, withdrawn, cancelled) in a filterable table, giving users a detailed audit trail of all activity.
+Add pagination controls below the transaction table so that when there are many transactions, they are split into pages of 5 rows each. This keeps the table compact and scannable.
 
-## Changes
+## Verification Results
+- Both Streams and Transactions views render correctly on desktop and mobile (390px)
+- Type filtering (All/Created/Withdrawn/Cancelled) works correctly
+- Search and sort work for both views
+- On mobile, Counterparty column hides via `hidden sm:table-cell` as expected
+- Tx Hash column also hides on mobile -- table shows Type, Amount, Stream, and Date
 
-### 1. Add a view toggle to `src/pages/History.tsx`
-- Add a "Streams" / "Transactions" toggle (using the existing Tabs or a segmented button) at the top of the page
-- "Streams" view keeps the current card grid (unchanged)
-- "Transactions" view shows a new table-based transaction log
+## Changes (single file: `src/pages/History.tsx`)
 
-### 2. Build the Transaction Log section (inline in History.tsx)
-- Uses the existing `Table` component and `mockTransactions` data
-- Enriches each transaction with the parent stream's sender/recipient info via `getStreamById`
-- Columns: Type (badge), Amount, Stream (linked to `/stream/:id`), Counterparty (formatted address), Date, Tx Hash (external link)
-- Filters:
-  - **Type filter**: All / Created / Withdrawn / Cancelled (using a Select dropdown)
-  - **Search**: Reuses the existing search input to filter by address or tx hash
-  - **Sort**: Reuses the existing sort dropdown (newest/oldest/highest amount)
-- Empty state with icon when no transactions match
+### 1. Add pagination state
+- New state: `const [txPage, setTxPage] = useState(1)`
+- Constant: `const TX_PER_PAGE = 5`
+- Reset page to 1 whenever filters change (txType, search, sort)
 
-### 3. Mobile responsiveness
-- Table uses `overflow-auto` wrapper (already built into the Table component)
-- On small screens, the Counterparty and Block columns are hidden via `hidden sm:table-cell`
-- Tx hash column stays compact (truncated with ellipsis + external link icon)
+### 2. Slice filtered transactions for current page
+- Derive `paginatedTxs = filteredTxs.slice((txPage - 1) * TX_PER_PAGE, txPage * TX_PER_PAGE)`
+- Derive `totalPages = Math.ceil(filteredTxs.length / TX_PER_PAGE)`
+- Render `paginatedTxs` in the table body instead of `filteredTxs`
+
+### 3. Add pagination controls below the table
+- Use the existing `Pagination` components from `src/components/ui/pagination.tsx`
+- Show: Previous button, page number buttons (with ellipsis for large page counts), Next button
+- Show a "Showing X-Y of Z transactions" label on the left
+- Hide pagination when total items fit on one page
+- Disable Previous on page 1, disable Next on last page
 
 ## Technical Details
 
 | Area | Detail |
-|------|--------|
-| Data source | `mockTransactions` from `src/lib/mock-data.ts` (9 transactions across 5 streams) |
-| Stream lookup | `getStreamById(tx.streamId)` to get sender/recipient for each transaction |
-| Address formatting | Existing `formatAddress()` helper |
-| Date formatting | `date-fns` `format()` (already used in TransactionHistory component) |
-| Type badges | Reuse the same `typeConfig` pattern from `TransactionHistory.tsx` (created=primary, withdrawn=accent, cancelled=destructive) |
-| View toggle | New state `const [view, setView] = useState<"streams" | "transactions">("streams")` with two buttons or a TabsList |
-| Loading state | Reuse `useSimulatedLoading` with skeleton rows for the table |
-
-### File changes
-- `src/pages/History.tsx` -- Add view toggle, transaction log table with filters, skeleton loading state. The existing streams view remains untouched behind the "Streams" tab.
+|------|-----------|
+| Page size | 5 transactions per page |
+| Page reset | `useEffect` resets `txPage` to 1 when `txType`, `search`, or `sort` changes |
+| Pagination UI | Uses existing `Pagination`, `PaginationContent`, `PaginationItem`, `PaginationLink`, `PaginationPrevious`, `PaginationNext`, `PaginationEllipsis` components |
+| Page numbers | Show first page, last page, current page +/- 1, with ellipsis for gaps |
+| Import additions | `useEffect` from React, Pagination components from `@/components/ui/pagination` |
 
 No new files or dependencies needed.
