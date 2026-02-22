@@ -7,6 +7,12 @@ import type { UseFormReturn } from "react-hook-form";
 import type { CreateStreamFormValues } from "@/lib/create-stream-schema";
 import { addDays, format } from "date-fns";
 
+const fadeUp = (delay: number) => ({
+  initial: { opacity: 0, y: 12 } as const,
+  animate: { opacity: 1, y: 0 } as const,
+  transition: { duration: 0.3, ease: "easeOut" as const, delay },
+});
+
 interface Props {
   form: UseFormReturn<CreateStreamFormValues>;
 }
@@ -34,26 +40,26 @@ export function StepSuccess({ form }: Props) {
         <CheckCircle2 className="h-16 w-16 text-primary mb-4" />
       </motion.div>
 
-      <h2 className="text-2xl font-bold mb-1">Stream Created!</h2>
-      <p className="text-muted-foreground text-sm mb-6">Your payment stream is now active and streaming.</p>
+      <motion.h2 className="text-2xl font-bold mb-1" {...fadeUp(0.3)}>Stream Created!</motion.h2>
+      <motion.p className="text-muted-foreground text-sm mb-6" {...fadeUp(0.4)}>Your payment stream is now active and streaming.</motion.p>
 
-      <div className="w-full rounded-lg border border-border/50 bg-muted/30 p-4 mb-6 text-left space-y-3">
-        {rows.map((row) => (
-          <div key={row.label} className="flex justify-between text-sm">
+      <motion.div className="w-full rounded-lg border border-border/50 bg-muted/30 p-4 mb-6 text-left space-y-3" {...fadeUp(0.5)}>
+        {rows.map((row, i) => (
+          <motion.div key={row.label} className="flex justify-between text-sm" {...fadeUp(0.6 + i * 0.1)}>
             <span className="text-muted-foreground">{row.label}</span>
             <span className="font-medium">{row.value}</span>
-          </div>
+          </motion.div>
         ))}
-      </div>
+      </motion.div>
 
-      <div className="flex flex-col gap-3 w-full">
+      <motion.div className="flex flex-col gap-3 w-full" {...fadeUp(1.0)}>
         <Button onClick={() => navigate("/stream/1")} className="w-full">
           View Stream
         </Button>
         <Button variant="ghost" onClick={() => navigate("/dashboard")} className="w-full">
           Back to Dashboard
         </Button>
-      </div>
+      </motion.div>
     </div>
   );
 }
