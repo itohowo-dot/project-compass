@@ -77,7 +77,7 @@ export default function History() {
         </div>
 
         <Tabs value={tab} onValueChange={setTab}>
-          <TabsList className="w-full sm:w-auto overflow-x-auto">
+          <TabsList className="grid grid-cols-4 sm:inline-flex sm:w-auto">
             <TabsTrigger value="all">All <Badge variant="secondary" className="ml-1.5 text-xs">{counts.all}</Badge></TabsTrigger>
             <TabsTrigger value="active">Active <Badge variant="secondary" className="ml-1.5 text-xs">{counts.active}</Badge></TabsTrigger>
             <TabsTrigger value="completed">Completed <Badge variant="secondary" className="ml-1.5 text-xs">{counts.completed}</Badge></TabsTrigger>
