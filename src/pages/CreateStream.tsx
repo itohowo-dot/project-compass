@@ -15,6 +15,7 @@ import { StepReview } from "@/components/create-stream/StepReview";
 import { createStreamSchema, recipientSchema, amountSchema, durationSchema, type CreateStreamFormValues } from "@/lib/create-stream-schema";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, ArrowRight } from "lucide-react";
+import { Confetti } from "@/components/Confetti";
 
 const stepVariants = {
   enter: (direction: number) => ({ x: direction * 50, opacity: 0 }),
@@ -28,6 +29,7 @@ export default function CreateStream() {
   const [step, setStep] = useState(1);
   const [direction, setDirection] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showConfetti, setShowConfetti] = useState(false);
   const [stepError, setStepError] = useState("");
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -59,6 +61,8 @@ export default function CreateStream() {
     await new Promise((r) => setTimeout(r, 1500));
     toast({ title: "Stream Created! 🎉", description: "Your payment stream is now active." });
     setIsSubmitting(false);
+    setShowConfetti(true);
+    await new Promise((r) => setTimeout(r, 2000));
     navigate("/dashboard");
   };
 
@@ -73,6 +77,7 @@ export default function CreateStream() {
 
   return (
     <DashboardLayout>
+      {showConfetti && <Confetti onComplete={() => setShowConfetti(false)} />}
       <div className="max-w-lg mx-auto">
         <StepIndicator currentStep={step} />
 
