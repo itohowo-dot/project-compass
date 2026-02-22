@@ -1,103 +1,52 @@
 
-# Landing Page Enhancements
+# Add Dark/Light Mode Toggle Preview Animation to Hero
 
-## Overview
-Five improvements to make the landing page more complete, polished, and navigable: add the Navbar, smooth scrolling, an FAQ section, a stream visualization in the hero, and a proper multi-column footer.
+## Verification Summary
+All landing page sections were verified on both desktop (1920px) and mobile (390px):
+- Navbar: renders correctly with logo, nav links, theme toggle, and wallet button (hamburger menu on mobile with bottom tab bar)
+- Hero: heading, subtitle, stats, CTAs, and stream visualization all display properly
+- Social Proof Strip: trust badges render inline on desktop, wrap on mobile
+- Features ("Why DRIP?"): 3-column grid on desktop, stacked on mobile, hover effects working
+- How It Works: 4-step cards with dashed connector line on desktop
+- Use Cases: collapsible cards working
+- FAQ: accordion expand/collapse working
+- CTA: styled card with Launch App button
+- Footer: multi-column layout on desktop, stacked on mobile with all links visible
+- Smooth scrolling: "Learn More" button smoothly scrolls to features section
 
----
-
-## 1. Add Navbar to the Landing Page
-
-**File: `src/components/AnimatedRoutes.tsx`**
-- Import `Navbar` and render it above the `Routes` for the `/` route
-- Since other pages (Dashboard, Create, History) already use `DashboardLayout` which includes its own Navbar, we only need to conditionally show it on the Index route
-- Approach: wrap the Index route's element with `<><Navbar /><Index /></>` inside the `PageTransition`
-
-**File: `src/pages/Index.tsx`**
-- Remove the duplicate DRIP logo/branding from the hero section (the logo + "DRIP" text block at the top) since the Navbar already shows it
-- Keep the hero heading, subtitle, stats, and CTAs
-
----
-
-## 2. Smooth Scrolling
-
-**File: `src/index.css`**
-- Add `scroll-behavior: smooth` to the `html` element in the base layer
-
-**File: `src/pages/Index.tsx`**
-- The "Learn More" button already uses `href="#features"` -- smooth scrolling via CSS will handle this automatically
-- Add `id` attributes to other sections (e.g., `id="faq"`) for any future in-page links
+No issues found.
 
 ---
 
-## 3. Animated Stream Visualization in Hero
+## Theme Toggle Preview Animation
 
-**File: `src/components/StreamVisualization.tsx`** (new file)
-- A self-contained animated mock showing sBTC flowing from sender to recipient
-- Layout: two "wallet" boxes (Sender / Recipient) connected by a horizontal bar
-- Animated dots/particles flow left-to-right along the bar using Framer Motion
-- Below the bar: a small progress label like "0.42 / 1.00 sBTC streamed" that counts up
-- Styled with the existing DRIP design tokens (gradient-primary, border-border/50, bg-card/50)
-- Fully responsive: horizontal on desktop, slightly smaller on mobile
+### Overview
+Add an animated mini-preview below the stream visualization in the hero section that automatically toggles between dark and light mode appearances every few seconds, showcasing the theme system without actually changing the page theme.
 
-**File: `src/pages/Index.tsx`**
-- Import and place `StreamVisualization` below the CTA buttons in the hero, inside the staggered animation sequence (delay 0.5)
+### New Component: `src/components/ThemePreview.tsx`
+- A self-contained component that renders a small mock "app card" (like a miniature dashboard card)
+- Uses internal state to cycle between dark and light appearances every 3 seconds
+- The card transitions smoothly between light and dark color schemes using inline styles (not the actual theme system)
+- Includes a small Sun/Moon icon indicator that rotates during transitions
+- Layout: a compact rounded card (~300px wide) with:
+  - A mini header bar (mock nav with dot indicators)
+  - A mock stream progress bar
+  - A small "0.42 sBTC" label
+- Uses Framer Motion `AnimatePresence` and `animate` for smooth color/opacity transitions
+- Below the card: a subtle label like "Supports dark and light themes"
 
----
+### Integration: `src/pages/Index.tsx`
+- Import `ThemePreview` and place it after the `StreamVisualization` in the hero section
+- Wrap in a `motion.div` with delay 0.6 for staggered entrance
+- Centered, responsive layout
 
-## 4. FAQ Section
-
-**File: `src/pages/Index.tsx`**
-- Add an FAQ section between the Use Cases section and the CTA section
-- Use the existing `Accordion` component (`src/components/ui/accordion.tsx`) for expand/collapse
-- Section heading: "Frequently Asked Questions"
-- Questions:
-
-| Question | Answer |
-|----------|--------|
-| What is sBTC? | sBTC is a decentralized Bitcoin peg on the Stacks blockchain that lets you use BTC in smart contracts while maintaining Bitcoin's security. |
-| How does DRIP streaming work? | You lock sBTC in a smart contract specifying a recipient and duration. The contract vests funds linearly -- the recipient can withdraw their earned portion at any time. |
-| Are there any fees? | DRIP charges no protocol fees. You only pay standard Stacks network transaction fees for creating, withdrawing from, or cancelling a stream. |
-| Is it secure? | DRIP uses audited Clarity smart contracts on Stacks. Funds are held in a non-custodial escrow -- neither DRIP nor any third party can access your sBTC. |
-| Can I cancel a stream? | Yes. The sender can cancel an active stream at any time. Vested funds go to the recipient, and unvested funds are returned to the sender. |
-| What wallets are supported? | DRIP works with any Stacks-compatible wallet, including Leather (formerly Hiro Wallet) and Xverse. |
-
-- Motion entrance animation consistent with other sections
-
----
-
-## 5. Improved Footer
-
-**File: `src/pages/Index.tsx`**
-- Replace the simple single-row footer with a multi-column layout
-- Structure:
-
-```text
-+------------------+-------------+-------------+----------+
-| DRIP Protocol    | Product     | Community   | Legal    |
-| Brief tagline    | Dashboard   | Twitter     | Terms    |
-| about streaming  | Create      | Discord     | Privacy  |
-| Bitcoin payments | History     | GitHub      |          |
-|                  | Docs        |             |          |
-+------------------+-------------+-------------+----------+
-| (c) 2026 DRIP Protocol. Built on Stacks. Powered by Bitcoin. |
-+--------------------------------------------------------------+
-```
-
-- On mobile: 2x2 grid for the link columns, full-width for the branding section
-- All links are `href="#"` placeholders but organized meaningfully
-- Bottom bar with copyright and tagline
-
----
-
-## Technical Details
+### Technical Details
 
 | Area | Detail |
 |------|--------|
-| New file | `src/components/StreamVisualization.tsx` |
-| Modified files | `src/pages/Index.tsx`, `src/components/AnimatedRoutes.tsx`, `src/index.css` |
-| Dependencies | None new -- uses existing Framer Motion, Accordion, Lucide icons |
-| Smooth scrolling | CSS `scroll-behavior: smooth` on `html` |
-| FAQ component | Radix Accordion (already installed) |
-| Stream viz | Framer Motion `animate` with repeating particle animations |
-| Navbar on landing | Rendered conditionally in `AnimatedRoutes.tsx` for the `/` route only |
+| New file | `src/components/ThemePreview.tsx` |
+| Modified file | `src/pages/Index.tsx` |
+| Animation | Framer Motion `animate` with color transitions on a 3-second interval |
+| Dependencies | None new (Framer Motion + Lucide already installed) |
+| Theme isolation | Uses inline styles for the preview colors, does not affect the actual page theme |
+| Responsive | Max-width 300px, centered, scales down on mobile |
