@@ -67,7 +67,7 @@ export default function CreateStream() {
       case 1: return <StepRecipient form={form} />;
       case 2: return <StepAmount form={form} />;
       case 3: return <StepDuration form={form} />;
-      case 4: return <StepReview form={form} isSubmitting={isSubmitting} />;
+      case 4: return <StepReview form={form} isSubmitting={isSubmitting} onConfirmSubmit={form.handleSubmit(onSubmit)} />;
     }
   };
 
