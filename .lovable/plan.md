@@ -1,32 +1,45 @@
 
-
-# Add Subtle Animation at 100% Progress
+# Add Confetti Celebration Animation on Stream Creation
 
 ## Overview
 
-When the progress bar reaches 100% on the Review step, add a subtle pulse/glow animation to celebrate completion and draw attention to the fully-filled bar.
+When the user confirms stream creation and the submission succeeds, a confetti burst animation will play before navigating to the dashboard. This provides satisfying visual feedback for completing the flow.
+
+## Approach
+
+Build a lightweight confetti component using CSS animations -- no external library needed. The confetti will render as a fixed overlay with randomly positioned, colored particles that fall and fade out over ~2 seconds.
 
 ## Changes
 
-### `src/components/create-stream/StepIndicator.tsx`
+### 1. New file: `src/components/Confetti.tsx`
 
-1. When `progress === 100`, add a subtle pulse glow effect to the progress bar fill using a CSS animation class
-2. Change the percentage text to green/primary color with a "Complete" label instead of just "100%"
-3. Add a brief scale animation on the "100%" text
+A self-contained confetti component that:
+- Renders a fixed full-screen overlay (pointer-events: none) with ~50 confetti particles
+- Each particle is a small colored div with randomized position, rotation, delay, and color (using the app's amber/water/primary palette)
+- Uses CSS keyframes for falling + rotating animation (~2s duration)
+- Auto-removes itself after the animation completes via an `onComplete` callback
+- Accepts an optional `duration` prop (default 2000ms)
 
-Specifically:
-- Add a `shadow-[0_0_8px_rgba(var(--primary-rgb),0.5)]` glow to the bar when full, plus the existing `animate-[pulse_2s_ease-in-out_infinite]` for a gentle breathing glow
-- Change the percentage text from "100%" to a checkmark icon + "Complete" in primary color
-- The bar fill div gets conditional classes: when at 100%, add `shadow-primary/30 shadow-[0_0_8px]` for a soft glow effect
+### 2. Modified file: `src/pages/CreateStream.tsx`
+
+- Add a `showConfetti` state (boolean, default false)
+- In `onSubmit`, after the simulated delay and before navigating:
+  1. Set `showConfetti = true`
+  2. Show the toast
+  3. Wait ~2 seconds for the confetti to play
+  4. Navigate to dashboard
+- Render `{showConfetti && <Confetti onComplete={() => setShowConfetti(false)} />}` in the JSX
 
 ## Technical Details
 
 | File | Change |
 |------|--------|
-| `src/components/create-stream/StepIndicator.tsx` | Add conditional glow animation on fill bar at 100%, change "100%" text to "Complete" with primary color |
+| `src/components/Confetti.tsx` | New component -- CSS-based confetti burst with ~50 particles, auto-cleanup |
+| `src/pages/CreateStream.tsx` | Add `showConfetti` state, trigger confetti in `onSubmit` before navigation, render Confetti overlay |
 
-- Uses Tailwind's `shadow` utilities for glow effect -- no new keyframes needed
-- Adds a subtle `animate-pulse` (built into Tailwind) on the bar's box-shadow at 100%
-- The "Complete" text uses `text-primary font-medium` to stand out from the muted "Step X of Y" text
-- Includes a small Check icon from lucide-react (already imported) next to "Complete"
-
+- No new dependencies -- pure CSS animations with React
+- Confetti particles use `position: fixed` with `inset: 0` and `pointer-events: none` so they don't block interaction
+- Colors pulled from the app's design tokens (amber, water/blue, primary gold)
+- Each particle gets random: x-position (0-100%), start delay (0-0.5s), fall duration (1-2.5s), rotation, size (6-10px)
+- Respects `prefers-reduced-motion` by skipping the animation
+- The navigation delay increases from the current 0ms (after toast) to ~2s to let the confetti play
