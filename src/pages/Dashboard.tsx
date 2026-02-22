@@ -73,9 +73,12 @@ export default function Dashboard() {
 function EmptyState() {
   return (
     <div className="flex flex-col items-center justify-center py-16 text-center gradient-card rounded-lg border border-border/50">
-      <Droplets className="h-10 w-10 text-muted-foreground mb-3" />
-      <p className="text-muted-foreground text-sm">No streams yet.</p>
-      <Button size="sm" className="mt-4" asChild>
+      <Droplets className="h-12 w-12 text-muted-foreground mb-4" />
+      <h3 className="text-base font-semibold mb-1">No streams yet</h3>
+      <p className="text-muted-foreground text-sm max-w-xs">
+        Create your first payment stream to start sending or receiving sBTC.
+      </p>
+      <Button size="sm" className="mt-5" asChild>
         <Link to="/create"><Plus className="h-4 w-4 mr-1" />Create your first stream</Link>
       </Button>
     </div>

@@ -15,8 +15,10 @@ import { StepReview } from "@/components/create-stream/StepReview";
 import { StepSuccess } from "@/components/create-stream/StepSuccess";
 import { createStreamSchema, recipientSchema, amountSchema, durationSchema, type CreateStreamFormValues } from "@/lib/create-stream-schema";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, ArrowRight } from "lucide-react";
+import { ArrowLeft, ArrowRight, Wallet } from "lucide-react";
 import { Confetti } from "@/components/Confetti";
+import { useWallet } from "@/contexts/WalletContext";
+import { WalletButton } from "@/components/WalletButton";
 
 const stepVariants = {
   enter: (direction: number) => ({ x: direction * 50, opacity: 0 }),
@@ -34,6 +36,7 @@ export default function CreateStream() {
   const [stepError, setStepError] = useState("");
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { connected } = useWallet();
 
   const form = useForm<CreateStreamFormValues>({
     resolver: zodResolver(createStreamSchema),
@@ -76,6 +79,27 @@ export default function CreateStream() {
       case 5: return <StepSuccess form={form} />;
     }
   };
+
+  if (!connected) {
+    return (
+      <DashboardLayout>
+        <div className="max-w-lg mx-auto">
+          <Card className="gradient-card border-border/50">
+            <CardContent className="p-10 flex flex-col items-center text-center space-y-4">
+              <div className="h-14 w-14 rounded-full bg-primary/10 flex items-center justify-center">
+                <Wallet className="h-7 w-7 text-primary" />
+              </div>
+              <h2 className="text-xl font-semibold">Connect Your Wallet</h2>
+              <p className="text-muted-foreground text-sm max-w-xs">
+                You need to connect a wallet before creating a payment stream.
+              </p>
+              <WalletButton />
+            </CardContent>
+          </Card>
+        </div>
+      </DashboardLayout>
+    );
+  }
 
   return (
     <DashboardLayout>

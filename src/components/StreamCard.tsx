@@ -2,8 +2,13 @@ import { Link } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { ArrowUpRight, ArrowDownLeft, Eye } from "lucide-react";
 import { Stream, getProgress, getTimeLeft, getWithdrawable, getRemaining, formatAddress, MOCK_BTC_USD } from "@/lib/mock-data";
+import { useToast } from "@/hooks/use-toast";
 
 const statusConfig: Record<string, { label: string; className: string }> = {
   active: { label: "Active", className: "bg-amber-500/20 text-amber-400 border-amber-500/30" },
@@ -16,6 +21,7 @@ interface Props {
 }
 
 export function StreamCard({ stream }: Props) {
+  const { toast } = useToast();
   const progress = getProgress(stream);
   const timeLeft = getTimeLeft(stream);
   const withdrawable = getWithdrawable(stream);
@@ -96,14 +102,47 @@ export function StreamCard({ stream }: Props) {
               Details
             </Link>
           </Button>
-          {stream.status === "active" && (
-            <Button
-              variant={isOutgoing ? "destructive" : "default"}
-              size="sm"
-              className="flex-1"
-            >
-              {isOutgoing ? "Cancel" : `Withdraw ${withdrawable.toFixed(4)}`}
-            </Button>
+          {stream.status === "active" && isOutgoing && (
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="destructive" size="sm" className="flex-1">Cancel</Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Cancel Stream?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Cancelling will return unvested funds to your wallet. Already vested funds remain claimable by the recipient.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Keep Stream</AlertDialogCancel>
+                  <AlertDialogAction onClick={() => toast({ title: "Stream Cancelled", description: "Unvested funds have been returned." })}>
+                    Cancel Stream
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          )}
+          {stream.status === "active" && !isOutgoing && withdrawable > 0 && (
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button size="sm" className="flex-1">Withdraw {withdrawable.toFixed(4)}</Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Confirm Withdrawal</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    You will withdraw {withdrawable.toFixed(4)} sBTC (≈ ${(withdrawable * MOCK_BTC_USD).toLocaleString("en-US", { maximumFractionDigits: 0 })}) from this stream.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction onClick={() => toast({ title: "Withdrawal Submitted", description: `${withdrawable.toFixed(4)} sBTC withdrawal is processing.` })}>
+                    Confirm
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           )}
         </div>
       </CardContent>
