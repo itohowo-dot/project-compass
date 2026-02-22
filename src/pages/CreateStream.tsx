@@ -20,6 +20,7 @@ const stepSchemas = [recipientSchema, amountSchema, durationSchema];
 export default function CreateStream() {
   const [step, setStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [stepError, setStepError] = useState("");
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -37,8 +38,10 @@ export default function CreateStream() {
       result.error.issues.forEach((issue) => {
         form.setError(issue.path[0] as keyof CreateStreamFormValues, { message: issue.message });
       });
+      setStepError("Please fix the errors below before continuing.");
       return;
     }
+    setStepError("");
     setStep((s) => Math.min(s + 1, 4));
   };
 
@@ -59,6 +62,9 @@ export default function CreateStream() {
           <CardContent className="p-6">
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)}>
+                <div aria-live="assertive" className="sr-only">
+                  {stepError}
+                </div>
                 {step === 1 && <StepRecipient form={form} />}
                 {step === 2 && <StepAmount form={form} />}
                 {step === 3 && <StepDuration form={form} />}

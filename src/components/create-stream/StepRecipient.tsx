@@ -38,6 +38,7 @@ export function StepRecipient({ form }: Props) {
       setBnsStatus("resolved");
       setResolvedAddress(address);
       form.setValue("recipientAddress", address, { shouldValidate: true });
+      form.clearErrors("recipientAddress");
     } else {
       setBnsStatus("not_found");
       setResolvedAddress(null);

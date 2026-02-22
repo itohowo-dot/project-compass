@@ -1,8 +1,11 @@
+import { useEffect } from "react";
 import { UseFormReturn } from "react-hook-form";
 import { CreateStreamFormValues } from "@/lib/create-stream-schema";
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { AlertTriangle } from "lucide-react";
 import { useWallet } from "@/contexts/WalletContext";
 
 const MOCK_BTC_USD = 97500;
@@ -14,6 +17,15 @@ interface Props {
 export function StepAmount({ form }: Props) {
   const { balance } = useWallet();
   const amount = form.watch("amount");
+  const exceedsBalance = typeof amount === "number" && amount > balance;
+
+  useEffect(() => {
+    if (exceedsBalance) {
+      form.setError("amount", { message: `Amount exceeds your balance of ${balance.toFixed(4)} sBTC` });
+    } else if (typeof amount === "number" && amount > 0) {
+      form.clearErrors("amount");
+    }
+  }, [amount, balance, exceedsBalance, form]);
   const usdValue = amount ? (amount * MOCK_BTC_USD).toLocaleString("en-US", { style: "currency", currency: "USD" }) : "$0.00";
 
   const setPercent = (pct: number) => {
@@ -61,6 +73,15 @@ export function StepAmount({ form }: Props) {
           </Button>
         ))}
       </div>
+
+      {exceedsBalance && (
+        <Alert variant="destructive" className="mt-2">
+          <AlertTriangle className="h-4 w-4" />
+          <AlertDescription>
+            Amount exceeds your available balance of {balance.toFixed(4)} sBTC.
+          </AlertDescription>
+        </Alert>
+      )}
     </div>
   );
 }
