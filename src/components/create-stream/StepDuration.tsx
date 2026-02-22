@@ -3,6 +3,7 @@ import { CreateStreamFormValues } from "@/lib/create-stream-schema";
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { CheckCircle2 } from "lucide-react";
 
 const BLOCKS_PER_DAY = 144;
 const presets = [
@@ -35,7 +36,12 @@ export function StepDuration({ form }: Props) {
         name="durationDays"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Duration (days)</FormLabel>
+            <FormLabel className="flex items-center gap-1.5">
+              Duration (days)
+              {typeof days === "number" && days >= 1 && days <= 365 && (
+                <CheckCircle2 className="h-3.5 w-3.5 text-primary animate-in fade-in" />
+              )}
+            </FormLabel>
             <FormControl>
               <Input
                 type="number"
