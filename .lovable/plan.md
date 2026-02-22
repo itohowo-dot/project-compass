@@ -1,40 +1,43 @@
 
-
-# Make Theme Preview Interactive
+# Add Hint Animation to Theme Preview Card
 
 ## Verification Results
-The landing page was verified on both desktop (1920px) and mobile (390px). All sections render correctly:
-- Navbar with navigation links and theme toggle
-- Hero with stream visualization and theme preview card (auto-cycling between dark/light)
-- All mid-page sections (features, how it works, use cases, FAQ)
-- Multi-column footer
+The click-to-toggle theme preview was verified on both desktop (1920px) and mobile (390px):
+- Card renders correctly in dark mode by default
+- Clicking toggles to light mode with smooth color transitions and icon rotation
+- "Click to toggle theme" label visible below the card
+- Hover and tap scale effects working
 
 No issues found.
 
 ---
 
-## Change: Click-to-Toggle Instead of Auto-Cycling
+## Hint Animation
+
+### Overview
+Add a one-time "nudge" animation on first load to draw attention to the theme preview card and hint that it's clickable. Once the user clicks, the hint disappears permanently.
 
 ### File: `src/components/ThemePreview.tsx`
 
-**Current behavior:** The component auto-cycles between dark and light every 3 seconds via `setInterval`.
+**Changes:**
+1. Add a `hasClicked` state (default `false`) that becomes `true` on first click
+2. When `hasClicked` is `false`, show a subtle pulsing ring/glow animation around the card using a `motion.div` wrapper with a repeating `animate` (scale 1 to 1.03, opacity pulse)
+3. Add a small animated "hand tap" indicator -- a `MousePointerClick` icon from Lucide that gently bounces below the card, next to the "Click to toggle theme" text
+4. On first click, set `hasClicked` to `true`, which fades out both the pulse ring and the tap icon
+5. After the user clicks, the label remains as "Click to toggle theme" but without the bouncing icon
 
-**New behavior:**
-- Remove the `useEffect` with `setInterval` entirely
-- Make the entire card clickable with `cursor-pointer` and an `onClick` handler that toggles `isDark`
-- Add a subtle hover scale effect (`whileHover={{ scale: 1.02 }}`) on the outer `motion.div` for click affordance
-- Update the label from "Supports dark and light themes" to "Click to toggle theme" to hint at interactivity
-- Add a `whileTap={{ scale: 0.98 }}` for tactile feedback
+**Animation details:**
+- Pulse ring: a `motion.div` positioned absolutely behind the card with `animate={{ scale: [1, 1.04, 1], opacity: [0.3, 0.6, 0.3] }}` repeating infinitely with a 2-second duration
+- Tap icon: `MousePointerClick` icon with a `motion.div` doing `animate={{ y: [0, -4, 0] }}` bouncing infinitely over 1.5 seconds
+- Both wrapped in `AnimatePresence` so they fade out smoothly when `hasClicked` becomes `true`
 
-### Summary of Changes
+### Technical Details
 
-| What | Before | After |
-|------|--------|-------|
-| Toggle mechanism | Auto-cycle every 3s | Click to toggle |
-| `useEffect` | `setInterval` | Removed |
-| Cursor | Default | `cursor-pointer` |
-| Hover effect | None | `scale: 1.02` |
-| Tap effect | None | `scale: 0.98` |
-| Label text | "Supports dark and light themes" | "Click to toggle theme" |
-
-Only one file is modified: `src/components/ThemePreview.tsx`. No new dependencies needed.
+| Area | Detail |
+|------|--------|
+| File modified | `src/components/ThemePreview.tsx` |
+| New imports | `MousePointerClick` from `lucide-react` |
+| State added | `hasClicked` boolean |
+| Animations | Pulse ring (repeating scale/opacity), bouncing tap icon |
+| Cleanup | Both hints removed after first click via `AnimatePresence` |
+| No new dependencies | Uses existing Framer Motion and Lucide |
