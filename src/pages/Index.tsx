@@ -4,6 +4,8 @@ import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { AnimatedNumber } from "@/components/AnimatedNumber";
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/components/ui/collapsible";
+import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
+import { StreamVisualization } from "@/components/StreamVisualization";
 import { useState } from "react";
 
 const FEATURES = [
@@ -42,6 +44,33 @@ const TRUST_BADGES = [
   { icon: ShieldCheck, label: "Non-Custodial" },
 ];
 
+const FAQ_ITEMS = [
+  { q: "What is sBTC?", a: "sBTC is a decentralized Bitcoin peg on the Stacks blockchain that lets you use BTC in smart contracts while maintaining Bitcoin's security." },
+  { q: "How does DRIP streaming work?", a: "You lock sBTC in a smart contract specifying a recipient and duration. The contract vests funds linearly — the recipient can withdraw their earned portion at any time." },
+  { q: "Are there any fees?", a: "DRIP charges no protocol fees. You only pay standard Stacks network transaction fees for creating, withdrawing from, or cancelling a stream." },
+  { q: "Is it secure?", a: "DRIP uses audited Clarity smart contracts on Stacks. Funds are held in a non-custodial escrow — neither DRIP nor any third party can access your sBTC." },
+  { q: "Can I cancel a stream?", a: "Yes. The sender can cancel an active stream at any time. Vested funds go to the recipient, and unvested funds are returned to the sender." },
+  { q: "What wallets are supported?", a: "DRIP works with any Stacks-compatible wallet, including Leather (formerly Hiro Wallet) and Xverse." },
+];
+
+const FOOTER_LINKS = {
+  Product: [
+    { label: "Dashboard", to: "/dashboard" },
+    { label: "Create Stream", to: "/create" },
+    { label: "History", to: "/history" },
+    { label: "Docs", href: "#" },
+  ],
+  Community: [
+    { label: "Twitter", href: "#" },
+    { label: "Discord", href: "#" },
+    { label: "GitHub", href: "#" },
+  ],
+  Legal: [
+    { label: "Terms of Service", href: "#" },
+    { label: "Privacy Policy", href: "#" },
+  ],
+};
+
 const viewportOnce = { once: true, margin: "-50px" as any };
 
 export default function Index() {
@@ -56,18 +85,6 @@ export default function Index() {
         </div>
 
         <div className="relative z-10">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0 }}
-            className="flex items-center justify-center gap-2 mb-6"
-          >
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl gradient-primary glow-amber animate-[float_3s_ease-in-out_infinite]">
-              <Droplets className="h-6 w-6 text-primary-foreground" />
-            </div>
-            <span className="text-3xl font-bold text-gradient-primary">DRIP</span>
-          </motion.div>
-
           <motion.h1
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -118,6 +135,15 @@ export default function Index() {
             <Button asChild variant="outline" size="lg" className="w-full sm:w-auto border-border/50 text-base px-8">
               <a href="#features">Learn More</a>
             </Button>
+          </motion.div>
+
+          {/* Stream Visualization */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.5 }}
+          >
+            <StreamVisualization />
           </motion.div>
         </div>
       </header>
@@ -195,13 +221,9 @@ export default function Index() {
         </motion.div>
 
         <div className="relative">
-          {/* Desktop connector line */}
           <div className="hidden lg:block absolute top-1/2 left-[12.5%] right-[12.5%] h-px border-t-2 border-dashed border-border/40 -translate-y-1/2 z-0" />
-
           <div className="relative grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {/* Mobile vertical connector */}
             <div className="sm:hidden absolute left-6 top-8 bottom-8 w-px border-l-2 border-dashed border-border/40 z-0" />
-
             {STEPS.map((s, i) => (
               <motion.div
                 key={s.num}
@@ -240,6 +262,45 @@ export default function Index() {
         </div>
       </section>
 
+      {/* FAQ */}
+      <section id="faq" className="container py-20">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={viewportOnce}
+          transition={{ duration: 0.5 }}
+          className="text-center mb-12"
+        >
+          <h2 className="text-3xl md:text-4xl font-bold mb-4">Frequently Asked Questions</h2>
+          <p className="text-muted-foreground max-w-xl mx-auto">Everything you need to know about DRIP</p>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={viewportOnce}
+          transition={{ duration: 0.5, delay: 0.1 }}
+          className="max-w-2xl mx-auto"
+        >
+          <Accordion type="single" collapsible className="space-y-2">
+            {FAQ_ITEMS.map((item, i) => (
+              <AccordionItem
+                key={i}
+                value={`faq-${i}`}
+                className="rounded-xl border border-border/50 bg-card/50 px-6 data-[state=open]:border-primary/20 transition-colors"
+              >
+                <AccordionTrigger className="text-left hover:no-underline">
+                  {item.q}
+                </AccordionTrigger>
+                <AccordionContent className="text-muted-foreground">
+                  {item.a}
+                </AccordionContent>
+              </AccordionItem>
+            ))}
+          </Accordion>
+        </motion.div>
+      </section>
+
       {/* CTA */}
       <section className="container py-20">
         <motion.div
@@ -263,18 +324,48 @@ export default function Index() {
       </section>
 
       {/* Footer */}
-      <footer className="container py-8 border-t border-border/50">
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-muted-foreground">
-          <div className="flex items-center gap-2">
-            <Droplets className="h-4 w-4 text-primary" />
-            <span className="font-semibold text-foreground">DRIP Protocol</span>
+      <footer className="border-t border-border/50">
+        <div className="container py-12 sm:py-16">
+          <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+            {/* Brand */}
+            <div className="sm:col-span-2 lg:col-span-1">
+              <div className="flex items-center gap-2 mb-3">
+                <Droplets className="h-5 w-5 text-primary" />
+                <span className="text-lg font-bold text-foreground">DRIP Protocol</span>
+              </div>
+              <p className="text-sm text-muted-foreground max-w-xs">
+                Real-time sBTC payment streaming on Stacks. Programmable, trustless, and fully on-chain.
+              </p>
+            </div>
+
+            {/* Link columns */}
+            {Object.entries(FOOTER_LINKS).map(([title, links]) => (
+              <div key={title}>
+                <h4 className="text-sm font-semibold text-foreground mb-3">{title}</h4>
+                <ul className="space-y-2">
+                  {links.map((link) => (
+                    <li key={link.label}>
+                      {"to" in link ? (
+                        <Link to={link.to} className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                          {link.label}
+                        </Link>
+                      ) : (
+                        <a href={link.href} className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                          {link.label}
+                        </a>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
           </div>
-          <div className="flex items-center gap-6">
-            <a href="#" className="hover:text-foreground transition-colors">Docs</a>
-            <a href="#" className="hover:text-foreground transition-colors">GitHub</a>
-            <a href="#" className="hover:text-foreground transition-colors">Twitter</a>
+
+          {/* Bottom bar */}
+          <div className="mt-10 pt-6 border-t border-border/50 flex flex-col sm:flex-row items-center justify-between gap-3 text-sm text-muted-foreground">
+            <p>© 2026 DRIP Protocol. All rights reserved.</p>
+            <p>Built on Stacks. Powered by Bitcoin.</p>
           </div>
-          <p className="hidden sm:block">Built on Stacks. Powered by Bitcoin.</p>
         </div>
       </footer>
     </div>
