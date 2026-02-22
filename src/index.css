@@ -31,8 +31,8 @@
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 240 6% 85%;
-    --input: 240 6% 85%;
+    --border: 240 6% 82%;
+    --input: 240 6% 82%;
     --ring: 36 100% 45%;
 
     --radius: 0.75rem;
@@ -76,8 +76,8 @@
     --sidebar-ring: 36 100% 45%;
 
     /* Theme-adaptive gradient tokens */
-    --glass-from: 0 0% 100% / 0.7;
-    --glass-to: 0 0% 100% / 0.3;
+    --glass-from: 0 0% 100% / 0.8;
+    --glass-to: 0 0% 100% / 0.4;
     --bg-gradient-start: 240 5% 96%;
     --bg-gradient-end: 0 0% 98%;
     --card-gradient-start: 0 0% 100%;

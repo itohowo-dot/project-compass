@@ -98,7 +98,7 @@ export default function History() {
   return (
     <DashboardLayout>
       <div className="space-y-6">
-        <div className="flex items-start justify-between">
+        <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
             <h1 className="text-2xl font-bold">History</h1>
             <p className="text-muted-foreground text-sm mt-1">View and filter all your payment streams.</p>
@@ -184,8 +184,9 @@ export default function History() {
                   </div>
                 ) : (
                   <div className="flex flex-col items-center justify-center py-16 text-center gradient-card rounded-lg border border-border/50 mt-4">
-                    <Droplets className="h-10 w-10 text-muted-foreground mb-3" />
-                    <p className="text-muted-foreground text-sm">No streams match this filter.</p>
+                    <Droplets className="h-12 w-12 text-muted-foreground mb-4" />
+                    <h3 className="text-base font-semibold mb-1">No streams found</h3>
+                    <p className="text-muted-foreground text-sm max-w-xs">Try adjusting your search or filter to find what you're looking for.</p>
                   </div>
                 )}
               </TabsContent>
@@ -336,8 +337,9 @@ export default function History() {
               })()
             ) : (
               <div className="flex flex-col items-center justify-center py-16 text-center gradient-card rounded-lg border border-border/50">
-                <Droplets className="h-10 w-10 text-muted-foreground mb-3" />
-                <p className="text-muted-foreground text-sm">No transactions match this filter.</p>
+                <Droplets className="h-12 w-12 text-muted-foreground mb-4" />
+                <h3 className="text-base font-semibold mb-1">No transactions found</h3>
+                <p className="text-muted-foreground text-sm max-w-xs">Try adjusting your search or filter to find what you're looking for.</p>
               </div>
             )}
           </>

@@ -7,6 +7,10 @@ import { StreamActions } from "@/components/stream-detail/StreamActions";
 import { TransactionHistory } from "@/components/stream-detail/TransactionHistory";
 import { StreamDetailSkeleton } from "@/components/stream-detail/StreamDetailSkeleton";
 import { Button } from "@/components/ui/button";
+import {
+  Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink,
+  BreadcrumbSeparator, BreadcrumbPage,
+} from "@/components/ui/breadcrumb";
 import { getStreamById } from "@/lib/mock-data";
 import { useSimulatedLoading } from "@/hooks/use-simulated-loading";
 import { ArrowLeft, Droplets } from "lucide-react";
@@ -35,9 +39,17 @@ export default function StreamDetail() {
         <StreamDetailSkeleton />
       ) : (
         <div className="space-y-6">
-          <Button variant="ghost" size="sm" asChild>
-            <Link to="/dashboard"><ArrowLeft className="h-4 w-4 mr-1" />Back to Dashboard</Link>
-          </Button>
+          <Breadcrumb>
+            <BreadcrumbList>
+              <BreadcrumbItem>
+                <BreadcrumbLink asChild><Link to="/dashboard">Dashboard</Link></BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbPage>Stream #{stream.id}</BreadcrumbPage>
+              </BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
           <h1 className="text-xl font-bold">Stream #{stream.id}</h1>
           <StreamProgress stream={stream} />
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
