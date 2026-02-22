@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { StreamCard } from "@/components/StreamCard";
@@ -12,12 +12,15 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { mockStreams, mockTransactions, getStreamById, formatAddress } from "@/lib/mock-data";
 import { useSimulatedLoading } from "@/hooks/use-simulated-loading";
+import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationPrevious, PaginationNext, PaginationEllipsis } from "@/components/ui/pagination";
 import { Search, Droplets, ExternalLink, LayoutGrid, List } from "lucide-react";
 import { format } from "date-fns";
 
 type SortKey = "newest" | "oldest" | "highest";
 type TxTypeFilter = "all" | "created" | "withdrawn" | "cancelled";
 type ViewMode = "streams" | "transactions";
+
+const TX_PER_PAGE = 5;
 
 const typeConfig: Record<string, { label: string; className: string }> = {
   created: { label: "Created", className: "bg-primary/20 text-primary border-primary/30" },
@@ -32,7 +35,12 @@ export default function History() {
   const [search, setSearch] = useState("");
   const [sort, setSort] = useState<SortKey>("newest");
   const [txType, setTxType] = useState<TxTypeFilter>("all");
+  const [txPage, setTxPage] = useState(1);
 
+  // Reset page when filters change
+  useEffect(() => {
+    setTxPage(1);
+  }, [txType, search, sort]);
   // Streams filtering (unchanged)
   const filtered = useMemo(() => {
     let streams = mockStreams;
@@ -203,6 +211,28 @@ export default function History() {
                 </div>
               </div>
             ) : filteredTxs.length > 0 ? (
+              (() => {
+                const totalPages = Math.ceil(filteredTxs.length / TX_PER_PAGE);
+                const paginatedTxs = filteredTxs.slice((txPage - 1) * TX_PER_PAGE, txPage * TX_PER_PAGE);
+                const startItem = (txPage - 1) * TX_PER_PAGE + 1;
+                const endItem = Math.min(txPage * TX_PER_PAGE, filteredTxs.length);
+
+                const getPageNumbers = () => {
+                  const pages: (number | "ellipsis")[] = [];
+                  if (totalPages <= 5) {
+                    for (let i = 1; i <= totalPages; i++) pages.push(i);
+                  } else {
+                    pages.push(1);
+                    if (txPage > 3) pages.push("ellipsis");
+                    for (let i = Math.max(2, txPage - 1); i <= Math.min(totalPages - 1, txPage + 1); i++) pages.push(i);
+                    if (txPage < totalPages - 2) pages.push("ellipsis");
+                    pages.push(totalPages);
+                  }
+                  return pages;
+                };
+
+                return (
+              <div className="space-y-4">
               <div className="rounded-lg border border-border/50 overflow-hidden">
                 <Table>
                   <TableHeader>
@@ -216,7 +246,7 @@ export default function History() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {filteredTxs.map((tx) => {
+                    {paginatedTxs.map((tx) => {
                       const cfg = typeConfig[tx.type];
                       const counterparty = tx.stream
                         ? tx.stream.direction === "outgoing"
@@ -260,6 +290,50 @@ export default function History() {
                   </TableBody>
                 </Table>
               </div>
+
+              {totalPages > 1 && (
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
+                  <p className="text-sm text-muted-foreground">
+                    Showing {startItem}–{endItem} of {filteredTxs.length} transactions
+                  </p>
+                  <Pagination>
+                    <PaginationContent>
+                      <PaginationItem>
+                        <PaginationPrevious
+                          onClick={() => setTxPage((p) => Math.max(1, p - 1))}
+                          className={txPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                        />
+                      </PaginationItem>
+                      {getPageNumbers().map((page, i) =>
+                        page === "ellipsis" ? (
+                          <PaginationItem key={`ellipsis-${i}`}>
+                            <PaginationEllipsis />
+                          </PaginationItem>
+                        ) : (
+                          <PaginationItem key={page}>
+                            <PaginationLink
+                              isActive={txPage === page}
+                              onClick={() => setTxPage(page)}
+                              className="cursor-pointer"
+                            >
+                              {page}
+                            </PaginationLink>
+                          </PaginationItem>
+                        )
+                      )}
+                      <PaginationItem>
+                        <PaginationNext
+                          onClick={() => setTxPage((p) => Math.min(totalPages, p + 1))}
+                          className={txPage === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                        />
+                      </PaginationItem>
+                    </PaginationContent>
+                  </Pagination>
+                </div>
+              )}
+              </div>
+                );
+              })()
             ) : (
               <div className="flex flex-col items-center justify-center py-16 text-center gradient-card rounded-lg border border-border/50">
                 <Droplets className="h-10 w-10 text-muted-foreground mb-3" />
