@@ -166,10 +166,10 @@ export default function History() {
         {view === "streams" && (
           <Tabs value={tab} onValueChange={setTab}>
             <TabsList className="flex w-full overflow-x-auto scrollbar-hide sm:inline-flex sm:w-auto">
-              <TabsTrigger value="all" className="flex-shrink-0 px-2 sm:px-3">All <Badge variant="secondary" className="ml-1.5 text-xs">{counts.all}</Badge></TabsTrigger>
-              <TabsTrigger value="active" className="flex-shrink-0 px-2 sm:px-3">Active <Badge variant="secondary" className="ml-1.5 text-xs">{counts.active}</Badge></TabsTrigger>
-              <TabsTrigger value="completed" className="flex-shrink-0 px-2 sm:px-3">Completed <Badge variant="secondary" className="ml-1.5 text-xs">{counts.completed}</Badge></TabsTrigger>
-              <TabsTrigger value="cancelled" className="flex-shrink-0 px-2 sm:px-3">Cancelled <Badge variant="secondary" className="ml-1.5 text-xs">{counts.cancelled}</Badge></TabsTrigger>
+              <TabsTrigger value="all" className="flex-shrink-0 px-2 sm:px-3">All <Badge variant="secondary" className="ml-1.5 text-xs hidden sm:inline-flex">{counts.all}</Badge></TabsTrigger>
+              <TabsTrigger value="active" className="flex-shrink-0 px-2 sm:px-3">Active <Badge variant="secondary" className="ml-1.5 text-xs hidden sm:inline-flex">{counts.active}</Badge></TabsTrigger>
+              <TabsTrigger value="completed" className="flex-shrink-0 px-2 sm:px-3">Completed <Badge variant="secondary" className="ml-1.5 text-xs hidden sm:inline-flex">{counts.completed}</Badge></TabsTrigger>
+              <TabsTrigger value="cancelled" className="flex-shrink-0 px-2 sm:px-3">Cancelled <Badge variant="secondary" className="ml-1.5 text-xs hidden sm:inline-flex">{counts.cancelled}</Badge></TabsTrigger>
             </TabsList>
 
             {["all", "active", "completed", "cancelled"].map((t) => (
