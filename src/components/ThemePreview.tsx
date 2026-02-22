@@ -40,7 +40,13 @@ export function ThemePreview() {
   };
 
   return (
-    <div className="flex flex-col items-center gap-3 mt-8">
+    <motion.div
+      className="flex flex-col items-center gap-3 mt-8"
+      initial={{ opacity: 0, y: 30 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-50px" }}
+      transition={{ duration: 0.6, ease: "easeOut" }}
+    >
       <div className="relative">
         {/* Pulse ring hint */}
         <AnimatePresence>
@@ -172,6 +178,6 @@ export function ThemePreview() {
           Click to toggle theme
         </p>
       </div>
-    </div>
+    </motion.div>
   );
 }
