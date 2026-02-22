@@ -1,46 +1,53 @@
 
 
-# Improved Mobile Navigation
+# Enhanced Landing Page
 
-## Current Issues
+## Overview
+Upgrade the landing page with richer scroll animations, improved mobile layout, a new "Trusted By" / social proof section, and a more immersive hero. All changes are in a single file: `src/pages/Index.tsx`.
 
-The mobile navigation has two problems:
-1. **The hamburger menu** opens a basic dropdown below the header showing the same 3 links that are already in the bottom tab bar -- it's redundant and feels unfinished
-2. **No access to wallet or theme toggle** in the mobile menu -- on narrow screens the wallet button text gets cramped in the top bar
-3. **No animation** on the mobile menu open/close -- it just pops in and out
+## Changes
 
-## Solution
+### 1. Hero Section -- Mobile-First Improvements
+- Reduce vertical padding on mobile (`py-16 md:py-28 lg:py-36` instead of `py-24 md:py-36`)
+- Scale heading down for small screens: `text-3xl sm:text-4xl md:text-6xl lg:text-7xl`
+- Stack stats vertically on very narrow screens with `grid grid-cols-3` and smaller text
+- Make CTA buttons full-width on mobile (`w-full sm:w-auto`)
+- Add staggered entrance animations to the logo, heading, subtitle, stats, and buttons (each fading in sequentially using framer-motion `transition.delay`)
 
-Replace the plain dropdown mobile menu with a proper **slide-in Sheet** (sidebar drawer) that includes navigation links, wallet info, and theme toggle -- all in one polished panel. Keep the bottom tab bar for quick navigation.
+### 2. Richer Scroll Animations Throughout
+- **Features grid**: Cards animate in from alternating directions -- odd cards slide from left (`x: -30`), even cards from right (`x: 30`), creating a staggered zigzag effect instead of uniform `y: 20`
+- **How It Works steps**: Each card scales up from `scale: 0.9` + fades in, with increasing delays, giving a "building blocks" feel
+- **Use Cases**: Cards slide up with a slight rotation (`rotate: 2deg`) that straightens on enter
+- **CTA section**: Scales up from `scale: 0.95` with a glow pulse animation on enter
+- Add `whileInView` with `viewport={{ once: true, margin: "-50px" }}` so animations trigger slightly before elements are fully in view (feels snappier)
 
-### What changes:
+### 3. New "Social Proof" Strip (between Hero and Features)
+- A horizontal strip with 3-4 trust signals: "Built on Stacks", "100% On-Chain", "Open Source", "Non-Custodial"
+- Simple pill/badge layout with icons, subtle border, fades in on scroll
+- Responsive: wraps naturally on mobile
 
-**`src/components/Navbar.tsx`**
-- Replace the inline mobile dropdown (lines 63-88) with a `<Sheet>` component that slides in from the right
-- The hamburger button opens the Sheet instead of toggling a state variable
-- Inside the Sheet, include:
-  - DRIP logo and brand at the top
-  - Navigation links (Dashboard, Create, History) with active states and 44px min touch targets
-  - A divider/separator
-  - Wallet connection status (address, balance) or "Connect Wallet" button
-  - Theme toggle (light/dark switch)
-  - Close button (built into Sheet)
-- Remove the `mobileOpen` state since Sheet manages its own open/close
-- Add smooth slide-in animation (comes free with the Sheet component)
-- Add ARIA label to the hamburger button for accessibility
+### 4. Enhanced Feature Cards
+- Add a subtle hover scale transform (`group-hover:scale-105` on the icon container)
+- Add a faint gradient line at the top of each card on hover (using a pseudo-element via a small `before:` utility or a div)
 
-**`src/components/WalletButton.tsx`**
-- Extract a `WalletInfo` variant or add a `variant` prop that renders a simplified mobile-friendly layout (full-width button style) for use inside the Sheet
-- Or: just reuse the existing `WalletButton` inside the Sheet as-is since it already works standalone
+### 5. "How It Works" -- Connector Line
+- Add a horizontal dashed connector line between steps on desktop (`lg:`) using a positioned border element, replacing the simple arrow icon
+- On mobile, steps stack vertically with a vertical dashed line on the left side
 
-### No new dependencies needed
-The project already has `@radix-ui/react-dialog` (Sheet) and all required UI components.
+### 6. Footer Enhancement
+- Add a row of links: "Docs", "GitHub", "Twitter" (as placeholder `#` hrefs)
+- Keep it minimal, single row on mobile
 
-### Technical Details
+## Technical Details
 
-| File | Change |
-|------|--------|
-| `src/components/Navbar.tsx` | Replace inline mobile menu with Sheet drawer; add wallet + theme toggle inside; add aria-label to hamburger |
-| `src/components/WalletButton.tsx` | No changes needed -- reuse as-is inside the Sheet |
+| Area | Technique |
+|------|-----------|
+| Staggered hero entrance | framer-motion `transition: { delay: 0.1 * index }` on child divs |
+| Zigzag feature cards | `initial={{ opacity: 0, x: i % 2 === 0 ? -30 : 30 }}` |
+| Scale-in steps | `initial={{ opacity: 0, scale: 0.9 }}` with `whileInView` |
+| Social proof strip | New `const TRUST_BADGES` array + mapped badges with `motion.div` |
+| Connector lines | CSS `border-dashed` + absolute positioning between step cards |
+| Mobile responsiveness | Tailwind responsive prefixes throughout (`text-3xl sm:text-4xl`, `w-full sm:w-auto`, `py-16 md:py-28`) |
 
-The bottom tab bar stays as-is for quick thumb-accessible navigation. The Sheet provides full access to all app functions including wallet and theme switching.
+All changes stay in `src/pages/Index.tsx` and `src/index.css` (if any new utility classes are needed for the connector line). No new dependencies required -- everything uses existing framer-motion and Tailwind.
+
