@@ -1,74 +1,55 @@
 
 
-# ENS/BNS Address Lookup and Enhanced Recent Recipients
+# Inline Form Validation with Accessible Error Messages
 
-## Overview
+## What's Already Working
+- Each step uses `FormField` / `FormMessage` to show inline errors
+- `FormControl` already sets `aria-invalid` and `aria-describedby` on inputs
+- The `goNext()` function validates per-step and calls `form.setError()` to surface issues
+- Zod schemas already have descriptive error messages
 
-Enhance the recipient step in Create Stream with a mock BNS (Bitcoin Name Service) lookup that resolves `.btc` names to Stacks addresses, and upgrade the recent recipients list into a searchable dropdown with labels.
+## What's Missing
+1. **Screen reader announcements** -- `FormMessage` doesn't have `role="alert"` or `aria-live`, so errors appear visually but aren't announced
+2. **Balance-aware validation** -- the amount step shows the balance but doesn't prevent exceeding it
+3. **Real-time validation feedback** -- form mode is `onTouched` but some fields (like amount) would benefit from showing success states too
+4. **Step-level error summary** -- when `goNext()` fails, there's no top-level announcement that errors exist
 
 ## Changes
 
-### 1. Mock BNS Data (`src/lib/mock-data.ts`)
+### 1. `src/components/ui/form.tsx` -- Add `role="alert"` to FormMessage
 
-Add a mock BNS registry mapping `.btc` names to Stacks addresses, plus a helper function:
+Add `role="alert"` to the `FormMessage` `<p>` element. This is the standard accessible way to announce dynamic error text to screen readers. Since `FormMessage` only renders when an error exists, `role="alert"` will trigger an announcement each time it appears.
 
-```text
-mockBnsNames = {
-  "alice.btc"  -> SP3FBR2AGK5H9QBDH3EEN6DF8EK8JY7RX8QJ5SVTE
-  "bob.btc"    -> SP2ZNGJ85ENDY6QRHQ5P2D4FXKGZWCKTB2T0Z55KS
-  "carol.btc"  -> SP1HTBVD3JG9C05J7HBJTHGR0GGW7KXW28M5JS8QE
-  "dave.btc"   -> SP3K8BC0PPEVCV7NZ6QSRWPQ2JE9E5B6N3PA0KR9D
-}
-```
+### 2. `src/components/create-stream/StepAmount.tsx` -- Balance validation
 
-- `resolveBns(name: string): string | null` -- looks up a `.btc` name and returns the address or null
-- `reverseBns(address: string): string | null` -- returns the BNS name for an address if one exists
+Add a `useEffect` that registers a custom validation via `form.register` or triggers `form.setError` when amount exceeds balance. Show a warning `Alert` component when the entered amount is greater than the wallet balance, with `role="alert"` for accessibility.
 
-Also add a `recentRecipients` array with label + address objects (moved out of the component):
+### 3. `src/components/create-stream/StepRecipient.tsx` -- Success state
 
-```text
-[
-  { label: "alice.btc", address: "SP3FBR..." },
-  { label: "bob.btc",   address: "SP2ZNG..." },
-]
-```
+After BNS resolution succeeds, clear any existing form error on `recipientAddress` so the green badge and absence of error text provide a clear success signal.
 
-### 2. Enhanced Recipient Step (`src/components/create-stream/StepRecipient.tsx`)
+### 4. `src/pages/CreateStream.tsx` -- Step-level error announcement
 
-**BNS Lookup:**
-- When the user types a value ending in `.btc`, debounce (300ms) and call `resolveBns()`
-- Show a resolved address badge below the input with a checkmark icon (e.g., "alice.btc resolves to SP3FBR...SVTE")
-- If resolution fails, show a subtle error message "Name not found"
-- When a BNS name resolves, set the form value to the resolved Stacks address
+Add an `aria-live="assertive"` region that announces "Please fix the errors below" when `goNext()` validation fails. This helps screen reader users understand why the step didn't advance.
 
-**Recent Recipients Dropdown:**
-- Replace the current flat button list with a Popover-based searchable dropdown
-- Use the existing `Command` (cmdk) component for search/filter
-- Each item shows the BNS label (if available) and the truncated address
-- Clicking an item fills the form field and closes the dropdown
-- Trigger is a "Recent Recipients" button with a `Clock` icon below the address input
+### 5. `src/lib/create-stream-schema.ts` -- Improved error messages
 
-**Input Enhancement:**
-- Update placeholder to `"SP... or name.btc"`
-- Keep the existing paste button
-
-### 3. Schema Update (`src/lib/create-stream-schema.ts`)
-
-Update `recipientSchema` to also accept BNS names (`.btc` suffix) as valid input, since the component will resolve them before advancing. The regex stays as-is since the form value will be set to the resolved address, but add a note comment for clarity.
+Refine error messages to be more descriptive and actionable:
+- `recipientAddress`: "Enter a valid Stacks address starting with SP, or use a .btc name"
+- `amount`: "Enter an amount between 0 and 21,000,000 sBTC"
+- `durationDays`: "Choose a duration between 1 and 365 days"
 
 ## Files Changed
 
 | File | Change |
 |------|--------|
-| `src/lib/mock-data.ts` | Add `mockBnsNames`, `resolveBns()`, `reverseBns()`, and `recentRecipients` array |
-| `src/components/create-stream/StepRecipient.tsx` | BNS lookup with debounce, resolved address display, searchable recent recipients dropdown using Command/Popover |
+| `src/components/ui/form.tsx` | Add `role="alert"` to `FormMessage` |
+| `src/components/create-stream/StepAmount.tsx` | Balance exceeded warning with accessible Alert |
+| `src/components/create-stream/StepRecipient.tsx` | Clear form error on successful BNS resolution |
+| `src/pages/CreateStream.tsx` | Add `aria-live` error announcement region on step validation failure |
+| `src/lib/create-stream-schema.ts` | Improved, more descriptive error messages |
 
-## Technical Details
-
-- BNS lookup uses a simulated 500ms async delay to mimic network latency
-- Debounce (300ms) prevents lookup on every keystroke
-- The Command component from cmdk is already installed and styled
-- The Popover component is already available
-- No schema change needed since the resolved Stacks address is what gets set in the form
-- All data remains mock -- no real BNS API calls
-
+## Technical Notes
+- `role="alert"` is the W3C-recommended approach for form errors -- it triggers an implicit `aria-live="assertive"` announcement
+- No new dependencies needed
+- Balance validation is client-side only (mock data), using the existing `useWallet` hook already imported in `StepAmount`
