@@ -7,18 +7,28 @@ import { formatAddress } from "@/lib/mock-data";
 import { Loader2, ShieldCheck, Info } from "lucide-react";
 import { addDays, format } from "date-fns";
 import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/components/ui/tooltip";
+import {
+  AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogHeader,
+  AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction,
+} from "@/components/ui/alert-dialog";
 
 const MOCK_BTC_USD = 97500;
 const BLOCKS_PER_DAY = 144;
 const MOCK_FEE = 0.000012;
 const MOCK_STX_USD = 1.85;
 
+function formatSmallUsd(value: number): string {
+  if (value < 0.01) return `$${value.toFixed(6).replace(/0+$/, "")}`;
+  return value.toLocaleString("en-US", { style: "currency", currency: "USD" });
+}
+
 interface Props {
   form: UseFormReturn<CreateStreamFormValues>;
   isSubmitting: boolean;
+  onConfirmSubmit: () => void;
 }
 
-export function StepReview({ form, isSubmitting }: Props) {
+export function StepReview({ form, isSubmitting, onConfirmSubmit }: Props) {
   const { address } = useWallet();
   const values = form.getValues();
   const dailyRate = values.amount / values.durationDays;
@@ -36,7 +46,7 @@ export function StepReview({ form, isSubmitting }: Props) {
     { label: "End (est.)", value: format(endDate, "MMM d, yyyy") },
   ];
 
-  const feeUsd = (MOCK_FEE * MOCK_STX_USD).toLocaleString("en-US", { style: "currency", currency: "USD" });
+  const feeUsd = formatSmallUsd(MOCK_FEE * MOCK_STX_USD);
 
   return (
     <div className="space-y-6">
@@ -79,10 +89,31 @@ export function StepReview({ form, isSubmitting }: Props) {
         </p>
       </div>
 
-      <Button type="submit" className="w-full" size="lg" disabled={isSubmitting}>
-        {isSubmitting && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-        Create Stream
-      </Button>
+      <AlertDialog>
+        <AlertDialogTrigger asChild>
+          <Button type="button" className="w-full" size="lg" disabled={isSubmitting}>
+            {isSubmitting && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+            Create Stream
+          </Button>
+        </AlertDialogTrigger>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirm Stream Creation</AlertDialogTitle>
+            <AlertDialogDescription>
+              You are about to create a stream of <span className="font-semibold text-foreground">{values.amount} sBTC</span> to{" "}
+              <span className="font-mono text-foreground">{formatAddress(values.recipientAddress)}</span>.
+              This action will submit a transaction to the Stacks network.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={onConfirmSubmit} disabled={isSubmitting}>
+              {isSubmitting && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+              Confirm & Create
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
