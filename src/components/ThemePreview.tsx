@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Sun, Moon, MousePointerClick } from "lucide-react";
 
@@ -28,16 +28,32 @@ const DARK = {
   dot3: "hsl(140 50% 50%)",
 };
 
+const SPARKLES = Array.from({ length: 8 }, (_, i) => {
+  const angle = (i / 8) * Math.PI * 2;
+  return { x: Math.cos(angle) * 60, y: Math.sin(angle) * 60, delay: i * 0.04 };
+});
+
 export function ThemePreview() {
   const [isDark, setIsDark] = useState(true);
   const [hasClicked, setHasClicked] = useState(false);
+  const [showSparkles, setShowSparkles] = useState(false);
 
   const t = isDark ? DARK : LIGHT;
 
   const handleClick = () => {
-    if (!hasClicked) setHasClicked(true);
+    if (!hasClicked) {
+      setHasClicked(true);
+      setShowSparkles(true);
+    }
     setIsDark((d) => !d);
   };
+
+  useEffect(() => {
+    if (showSparkles) {
+      const timer = setTimeout(() => setShowSparkles(false), 700);
+      return () => clearTimeout(timer);
+    }
+  }, [showSparkles]);
 
   return (
     <motion.div
@@ -48,6 +64,20 @@ export function ThemePreview() {
       transition={{ duration: 0.6, ease: "easeOut" }}
     >
       <div className="relative">
+        {/* Sparkle burst */}
+        <AnimatePresence>
+          {showSparkles && SPARKLES.map((s, i) => (
+            <motion.div
+              key={`sparkle-${i}`}
+              className="absolute left-1/2 top-1/2 w-1.5 h-1.5 rounded-full z-20"
+              style={{ backgroundColor: "hsl(36 90% 54%)", marginLeft: -3, marginTop: -3 }}
+              initial={{ x: 0, y: 0, scale: 0, opacity: 1 }}
+              animate={{ x: s.x, y: s.y, scale: [0, 1.2, 0.6], opacity: [1, 1, 0] }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.5, delay: s.delay, ease: "easeOut" }}
+            />
+          ))}
+        </AnimatePresence>
         {/* Pulse ring hint */}
         <AnimatePresence>
           {!hasClicked && (
