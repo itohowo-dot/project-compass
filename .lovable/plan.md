@@ -1,45 +1,59 @@
 
-# Add Confetti Celebration Animation on Stream Creation
+
+# Add Success Screen After Stream Creation
 
 ## Overview
 
-When the user confirms stream creation and the submission succeeds, a confetti burst animation will play before navigating to the dashboard. This provides satisfying visual feedback for completing the flow.
+Instead of immediately navigating to the dashboard after confetti, show a success screen that celebrates the stream creation and lets the user either view the new stream or go to the dashboard.
 
-## Approach
+## Current Flow
+1. User clicks "Confirm & Create"
+2. 1.5s simulated submission
+3. Toast appears
+4. Confetti plays for 2s
+5. Auto-navigate to /dashboard
 
-Build a lightweight confetti component using CSS animations -- no external library needed. The confetti will render as a fixed overlay with randomly positioned, colored particles that fall and fade out over ~2 seconds.
+## New Flow
+1. User clicks "Confirm & Create"
+2. 1.5s simulated submission
+3. Toast appears + Confetti plays
+4. **Success screen appears** (step 5) with stream summary, "View Stream" button, and "Go to Dashboard" link
+5. User chooses where to navigate
 
 ## Changes
 
-### 1. New file: `src/components/Confetti.tsx`
+### 1. New file: `src/components/create-stream/StepSuccess.tsx`
 
-A self-contained confetti component that:
-- Renders a fixed full-screen overlay (pointer-events: none) with ~50 confetti particles
-- Each particle is a small colored div with randomized position, rotation, delay, and color (using the app's amber/water/primary palette)
-- Uses CSS keyframes for falling + rotating animation (~2s duration)
-- Auto-removes itself after the animation completes via an `onComplete` callback
-- Accepts an optional `duration` prop (default 2000ms)
+A success screen component showing:
+- A large animated checkmark icon (using lucide `CheckCircle2`) with a scale-in animation via framer-motion
+- "Stream Created!" heading
+- Summary card with: recipient address, amount + USD value, duration, estimated end date
+- A mock stream ID (e.g., "stream-4") for the "View Stream" link
+- Primary button: "View Stream" linking to `/stream/stream-4`
+- Secondary button: "Back to Dashboard" linking to `/dashboard`
 
-### 2. Modified file: `src/pages/CreateStream.tsx`
+### 2. Modified: `src/pages/CreateStream.tsx`
 
-- Add a `showConfetti` state (boolean, default false)
-- In `onSubmit`, after the simulated delay and before navigating:
-  1. Set `showConfetti = true`
-  2. Show the toast
-  3. Wait ~2 seconds for the confetti to play
-  4. Navigate to dashboard
-- Render `{showConfetti && <Confetti onComplete={() => setShowConfetti(false)} />}` in the JSX
+- Change `onSubmit` to stop auto-navigating: instead of `navigate("/dashboard")`, set `step` to 5 and trigger confetti
+- Add step 5 to `stepContent()` rendering `StepSuccess`
+- Update `StepIndicator` rendering to hide it on step 5 (success screen doesn't need step dots)
+- Hide the Back/Continue footer when `step === 5`
+- Remove the 2-second navigation delay since the user now controls when to leave
+
+### 3. Modified: `src/components/create-stream/StepIndicator.tsx`
+
+- No changes needed -- the component already receives `currentStep` and we'll simply not render it when on step 5
 
 ## Technical Details
 
 | File | Change |
 |------|--------|
-| `src/components/Confetti.tsx` | New component -- CSS-based confetti burst with ~50 particles, auto-cleanup |
-| `src/pages/CreateStream.tsx` | Add `showConfetti` state, trigger confetti in `onSubmit` before navigation, render Confetti overlay |
+| `src/components/create-stream/StepSuccess.tsx` | New component with animated checkmark, stream summary, and navigation buttons |
+| `src/pages/CreateStream.tsx` | Replace auto-navigate with step 5 success screen; show confetti alongside it; hide StepIndicator on step 5 |
 
-- No new dependencies -- pure CSS animations with React
-- Confetti particles use `position: fixed` with `inset: 0` and `pointer-events: none` so they don't block interaction
-- Colors pulled from the app's design tokens (amber, water/blue, primary gold)
-- Each particle gets random: x-position (0-100%), start delay (0-0.5s), fall duration (1-2.5s), rotation, size (6-10px)
-- Respects `prefers-reduced-motion` by skipping the animation
-- The navigation delay increases from the current 0ms (after toast) to ~2s to let the confetti play
+- The success screen uses `framer-motion` for the checkmark scale-in animation (already a dependency)
+- Mock stream ID will be "stream-1" to link to an existing mock stream detail page
+- The confetti will play concurrently with the success screen appearing (no blocking delay)
+- The card styling matches the existing `gradient-card border-border/50` pattern
+- Form values are read from the form to display the summary on the success screen
+
