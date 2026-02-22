@@ -1,42 +1,43 @@
 
 
-# Animated Step Transitions for Create Stream
+# Confirmation Dialog and Fee Display Fix
 
 ## Overview
 
-Add smooth slide + fade animations when navigating between steps in the Create Stream form using framer-motion (already installed). Steps will slide in from the right when advancing and from the left when going back.
-
-## Approach
-
-Track the navigation direction (forward/back) and use `AnimatePresence` with directional variants so that:
-- **Going forward**: current step slides out left + fades, new step slides in from right + fades in
-- **Going back**: current step slides out right + fades, new step slides in from left + fades in
+Two changes: (1) add an alert dialog that appears when the user clicks "Create Stream" on the review step, requiring explicit confirmation before submission, and (2) fix the network fee USD display to show meaningful precision for very small dollar amounts.
 
 ## Changes
 
-### `src/pages/CreateStream.tsx`
+### 1. Confirmation Dialog (`src/components/create-stream/StepReview.tsx`)
 
-1. Import `AnimatePresence` and `motion` from `framer-motion`
-2. Add a `direction` state (`1` for forward, `-1` for back) updated alongside `step`
-3. Wrap the step content area with `AnimatePresence mode="wait"` and `custom={direction}`
-4. Wrap each step component in a `motion.div` with:
-   - `key={step}` so AnimatePresence detects changes
-   - `custom={direction}` for directional variants
-   - Variants: `enter` slides in from `direction * 50px` with opacity 0, `center` at 0/opacity 1, `exit` slides out to `direction * -50px` with opacity 0
-   - Duration ~200-250ms with `easeOut` easing
-5. Update `goNext` to set `direction` to `1` before advancing
-6. Update the Back button to set `direction` to `-1` before going back
+Replace the direct submit button with an `AlertDialog` trigger:
+
+- The "Create Stream" button opens an `AlertDialog` instead of submitting directly
+- Dialog shows a summary: "You are about to create a stream of {amount} sBTC to {recipient}. This action will submit a transaction to the Stacks network."
+- Two buttons: "Cancel" (closes dialog) and "Confirm & Create" (triggers form submission)
+- The "Confirm & Create" button shows the loading spinner when submitting
+- Uses existing `AlertDialog` components from `@/components/ui/alert-dialog`
+
+### 2. Fix Fee USD Display (`src/components/create-stream/StepReview.tsx`)
+
+The current code uses `toLocaleString` with `style: "currency"` which rounds `0.0000222` to `$0.00`. Fix by:
+
+- Calculating the raw USD value (`MOCK_FEE * MOCK_STX_USD`)
+- If the value is less than $0.01, display it with enough significant digits (e.g., `~$0.000022`)
+- If >= $0.01, keep the standard currency format
+
+## Files Changed
 
 | File | Change |
 |------|--------|
-| `src/pages/CreateStream.tsx` | Add AnimatePresence + motion.div wrappers with directional slide/fade variants, track direction state |
+| `src/components/create-stream/StepReview.tsx` | Add AlertDialog confirmation before submit; fix fee USD formatting for small amounts |
+| `src/pages/CreateStream.tsx` | Minor adjustment -- pass an `onSubmit` callback prop to StepReview so the dialog can trigger form submission programmatically |
 
 ## Technical Details
 
-- `framer-motion` is already installed (v12.34.3)
-- `AnimatePresence mode="wait"` ensures exit animation completes before enter begins, preventing layout overlap
-- The `key={step}` prop triggers mount/unmount for AnimatePresence to detect
-- Uses `custom` prop on variants for direction-aware animation without duplicating variant definitions
-- Respects `prefers-reduced-motion` via framer-motion's built-in support
-- No changes needed in individual step components -- the motion wrapper handles everything
+- Uses existing `AlertDialog`, `AlertDialogTrigger`, `AlertDialogContent`, `AlertDialogHeader`, `AlertDialogTitle`, `AlertDialogDescription`, `AlertDialogFooter`, `AlertDialogCancel`, `AlertDialogAction` from `@/components/ui/alert-dialog` (already installed)
+- The "Create Stream" button becomes `type="button"` and acts as the `AlertDialogTrigger`
+- The `AlertDialogAction` calls the form's `handleSubmit(onSubmit)` to trigger validation and submission
+- For fee formatting: use a helper that checks if the value is below 0.01 and formats with `toFixed(6)` trimming trailing zeros, otherwise uses standard currency formatting
+- No new dependencies required
 
