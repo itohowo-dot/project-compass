@@ -1,46 +1,45 @@
 
 
-# Smooth Page Transition Animations
+# Add Transaction Log to History Page
 
 ## Overview
-Add route-level page transitions using framer-motion's `AnimatePresence` so navigating between pages has a smooth fade/slide effect instead of an instant swap.
-
-## What's Already Working
-- The landing page enhancements from `.lovable/plan.md` are fully implemented (verified on mobile 390px and desktop 1920px)
-- `DashboardLayout` has a basic `motion.main` fade-in, but it re-triggers on every mount rather than animating between routes
+The History page currently shows stream cards filtered by status. This enhancement adds a second view mode -- a **Transaction Log** -- that shows all individual transactions (created, withdrawn, cancelled) in a filterable table, giving users a detailed audit trail of all activity.
 
 ## Changes
 
-### 1. Create an AnimatedRoutes wrapper (`src/components/AnimatedRoutes.tsx`)
-- New component that wraps `<Routes>` with framer-motion's `AnimatePresence` and `useLocation`
-- `AnimatePresence mode="wait"` ensures the exiting page animates out before the new one animates in
-- Uses `location.pathname` as the `key` on `<Routes>` so React treats each route as a distinct element
+### 1. Add a view toggle to `src/pages/History.tsx`
+- Add a "Streams" / "Transactions" toggle (using the existing Tabs or a segmented button) at the top of the page
+- "Streams" view keeps the current card grid (unchanged)
+- "Transactions" view shows a new table-based transaction log
 
-### 2. Create a PageTransition layout component (`src/components/PageTransition.tsx`)
-- A `motion.div` wrapper applied to every route's element
-- Animates: fade in + slight upward slide on enter, fade out on exit
-- Keeps transitions quick (200-250ms) so navigation feels snappy, not sluggish
+### 2. Build the Transaction Log section (inline in History.tsx)
+- Uses the existing `Table` component and `mockTransactions` data
+- Enriches each transaction with the parent stream's sender/recipient info via `getStreamById`
+- Columns: Type (badge), Amount, Stream (linked to `/stream/:id`), Counterparty (formatted address), Date, Tx Hash (external link)
+- Filters:
+  - **Type filter**: All / Created / Withdrawn / Cancelled (using a Select dropdown)
+  - **Search**: Reuses the existing search input to filter by address or tx hash
+  - **Sort**: Reuses the existing sort dropdown (newest/oldest/highest amount)
+- Empty state with icon when no transactions match
 
-### 3. Update `src/App.tsx`
-- Replace the inline `<Routes>` block with the new `<AnimatedRoutes />` component
-- Each `<Route>` element gets wrapped in `<PageTransition>`
-
-### 4. Simplify `src/components/DashboardLayout.tsx`
-- Remove the `motion.main` animation (since `PageTransition` now handles the entrance)
-- Keep it as a plain `<main>` -- avoids double-animating
+### 3. Mobile responsiveness
+- Table uses `overflow-auto` wrapper (already built into the Table component)
+- On small screens, the Counterparty and Block columns are hidden via `hidden sm:table-cell`
+- Tx hash column stays compact (truncated with ellipsis + external link icon)
 
 ## Technical Details
 
-| File | Change |
+| Area | Detail |
 |------|--------|
-| `src/components/PageTransition.tsx` | New file -- `motion.div` with fade + slide variants, `initial/animate/exit` props |
-| `src/components/AnimatedRoutes.tsx` | New file -- `AnimatePresence` + `useLocation` wrapping `Routes` |
-| `src/App.tsx` | Replace `<Routes>` with `<AnimatedRoutes />`, wrap each route element in `<PageTransition>` |
-| `src/components/DashboardLayout.tsx` | Remove `motion.main` animation, use plain `<main>` |
+| Data source | `mockTransactions` from `src/lib/mock-data.ts` (9 transactions across 5 streams) |
+| Stream lookup | `getStreamById(tx.streamId)` to get sender/recipient for each transaction |
+| Address formatting | Existing `formatAddress()` helper |
+| Date formatting | `date-fns` `format()` (already used in TransactionHistory component) |
+| Type badges | Reuse the same `typeConfig` pattern from `TransactionHistory.tsx` (created=primary, withdrawn=accent, cancelled=destructive) |
+| View toggle | New state `const [view, setView] = useState<"streams" | "transactions">("streams")` with two buttons or a TabsList |
+| Loading state | Reuse `useSimulatedLoading` with skeleton rows for the table |
 
-### Animation Spec
-- **Enter**: `opacity: 0, y: 8` to `opacity: 1, y: 0` over 250ms ease-out
-- **Exit**: `opacity: 1` to `opacity: 0` over 150ms ease-in
-- `AnimatePresence mode="wait"` ensures no overlap between old and new page
+### File changes
+- `src/pages/History.tsx` -- Add view toggle, transaction log table with filters, skeleton loading state. The existing streams view remains untouched behind the "Streams" tab.
 
-No new dependencies needed -- framer-motion is already installed and has `AnimatePresence` built in.
+No new files or dependencies needed.
