@@ -1,107 +1,145 @@
 
 
-# Phase 2: Core Features Implementation
+# Phase 3: Polish, Animations, and History Page
 
-This plan covers building the Dashboard, Create Stream form, and Stream Detail pages with full mock data and interactive UI.
-
----
-
-## Step 1: Mock Data Layer
-
-Create a shared mock data module (`src/lib/mock-data.ts`) containing:
-
-- TypeScript types for `Stream`, `StreamStatus`, `StreamDirection`, `Transaction`
-- 5-6 mock streams with varied statuses (active outgoing, active incoming, completed, cancelled)
-- Mock transaction history entries (created, withdrawn events)
-- Helper functions: `getTimeLeft()`, `getProgress()`, `formatAddress()`
-
-This gives all three pages a consistent data source.
+This plan covers four workstreams: landing page enhancements, skeleton loading states, number counting animations, and the History page with filters.
 
 ---
 
-## Step 2: Dashboard Page (Phase 2.1 + 2.2)
+## Overview of Current State
 
-### 2a: Stats Cards Component (`src/components/dashboard/StatsCards.tsx`)
-- Three cards in a responsive row: "Total Streaming", "Total Received", "Active Streams"
-- Each card: icon, label, large value (sBTC amount or count), subtle subtitle
-- Uses the Card component with gradient-card styling and glow on hover
+All Phase 2 core features are working:
+- Landing page has hero, features grid, how-it-works, and CTA sections with Framer Motion animations
+- Dashboard shows stats cards, outgoing/incoming stream cards with shimmer progress bars
+- Create Stream form has 4-step flow with validation
+- Stream Detail page has progress, details, quick stats, actions, and transaction history
+- Wallet connection modal and mock state are functional
 
-### 2b: Stream Card Component (`src/components/StreamCard.tsx`)
-- Reusable card showing: direction icon (up arrow for outgoing, down for incoming), truncated address, status badge (Active=amber, Completed=green, Cancelled=red)
-- Animated progress bar with shimmer effect for active streams
-- Vested vs remaining amounts, time left countdown
-- Action buttons: "View Details" link, contextual "Cancel" or "Withdraw"
-- Hover: card lifts with shadow-card-hover
-
-### 2c: Dashboard Page Update (`src/pages/Dashboard.tsx`)
-- Greeting banner with time-of-day ("Good morning/afternoon/evening, Builder")
-- StatsCards row
-- "Outgoing Streams" section with stream cards + "Create Stream" button
-- "Incoming Streams" section with stream cards
-- Empty state component when no streams exist (illustration + CTA)
+The landing page already has a solid structure. This phase focuses on adding micro-interactions, loading states, animated counters, and the History page.
 
 ---
 
-## Step 3: Create Stream Form (Phase 2.3)
+## Step 1: Landing Page Enhancements
 
-### 3a: Form State & Validation (`src/lib/create-stream-schema.ts`)
-- Zod schema for each step and combined form
-- Fields: recipientAddress, amount, durationDays, with validation rules
+The landing page (`src/pages/Index.tsx`) already has hero, features, how-it-works, and CTA. Enhancements:
 
-### 3b: Step Components (in `src/components/create-stream/`)
-- **StepIndicator.tsx**: Progress bar showing 4 steps with labels, current step highlighted in primary
-- **StepRecipient.tsx**: Address input with paste button, Stacks address format validation, recent recipients list (mock)
-- **StepAmount.tsx**: sBTC amount input, USD conversion display (mock rate), wallet balance shown, quick-select buttons (25%, 50%, 75%, MAX)
-- **StepDuration.tsx**: Duration input (days), block height conversion display, preset buttons (7d, 14d, 30d, 90d, 1yr), calculated streaming rate
-- **StepReview.tsx**: Full summary card with all parameters (from, to, amount, duration, rate, estimated dates, network fee), escrow disclosure note, "Create Stream" CTA button
+### 1a: Add Use Cases Section
+- New section between "How It Works" and CTA
+- 4 expandable cards: Payroll Streaming, Token Vesting, Creator Economy, DAO Treasury
+- Each card has icon, title, short description, expandable detail on click
+- Uses Accordion or Collapsible component from shadcn/ui
 
-### 3c: CreateStream Page Update (`src/pages/CreateStream.tsx`)
-- Multi-step form container using React Hook Form with Zod resolver
-- Step state management (currentStep 1-4)
-- Back/Continue navigation with per-step validation
-- On submit: toast success notification + redirect to dashboard
+### 1b: Add Live Protocol Stats to Hero
+- Display mock stats below the subtitle: "X sBTC Streamed", "Y Active Streams"
+- Stats use the counting animation (built in Step 3)
+- Adds credibility and visual interest
 
----
+### 1c: Enhanced Animations
+- Add a water drop ripple animation behind the hero logo (uses existing `water-drop` and `ripple` keyframes)
+- Staggered card entrance animations on features grid (already partially done, refine delays)
+- Floating animation on the DRIP logo icon using the `float` keyframe
 
-## Step 4: Stream Detail Page (Phase 2.4)
-
-### 4a: Detail Components (in `src/components/stream-detail/`)
-- **StreamProgress.tsx**: Large animated progress bar with percentage label, shimmer on active, sender-to-recipient visual with addresses
-- **StreamDetailsCard.tsx**: Card with status badge, sender, recipient, total amount, duration, start/end block heights, created date
-- **StreamQuickStats.tsx**: Grid of stat items: Vested, Withdrawn, Withdrawable, Remaining, Time Left, Daily Rate
-- **StreamActions.tsx**: Withdraw button (for incoming, shows withdrawable amount) and Cancel button (for outgoing), each with AlertDialog confirmation modal
-- **TransactionHistory.tsx**: Table/list of on-chain events (stream created, withdrawals) with mock tx hashes, timestamps, amounts, and "View on Explorer" links
-
-### 4b: StreamDetail Page Update (`src/pages/StreamDetail.tsx`)
-- Looks up stream by ID from mock data
-- "Back to Dashboard" breadcrumb link
-- StreamProgress visualization at top
-- Two-column grid on desktop (Details + Quick Stats left, Actions + History right)
-- 404-style state if stream ID not found
+### Files modified:
+- `src/pages/Index.tsx` — add use cases section, protocol stats, enhanced animations
 
 ---
 
-## Files Created/Modified
+## Step 2: Skeleton Loading States
+
+Create skeleton components that show while data is "loading" (simulated with a brief delay).
+
+### 2a: Skeleton Components
+- `src/components/dashboard/StatsCardsSkeleton.tsx` — 3 skeleton cards matching StatsCards layout
+- `src/components/StreamCardSkeleton.tsx` — skeleton matching StreamCard layout (progress bar, text lines, buttons)
+- `src/components/stream-detail/StreamDetailSkeleton.tsx` — skeleton for the full stream detail page (progress bar, details card, stats grid)
+
+### 2b: Loading Hook
+- `src/hooks/use-simulated-loading.ts` — simple hook that returns `isLoading: true` for a configurable duration (e.g., 800ms), then flips to false
+- Used by Dashboard, Stream Detail, and History pages to show skeletons briefly
+
+### 2c: Integration
+- `src/pages/Dashboard.tsx` — wrap StatsCards and StreamCard grids with loading state, show skeletons first
+- `src/pages/StreamDetail.tsx` — show skeleton on initial load before revealing content
+
+### Files created:
+- `src/components/dashboard/StatsCardsSkeleton.tsx`
+- `src/components/StreamCardSkeleton.tsx`
+- `src/components/stream-detail/StreamDetailSkeleton.tsx`
+- `src/hooks/use-simulated-loading.ts`
+
+### Files modified:
+- `src/pages/Dashboard.tsx`
+- `src/pages/StreamDetail.tsx`
+
+---
+
+## Step 3: Number Counting Animations
+
+Animated counters that tick up from 0 to the target value when elements come into view.
+
+### 3a: CountUp Hook
+- `src/hooks/use-count-up.ts` — custom hook that animates a number from 0 to a target value over a configurable duration using `requestAnimationFrame`
+- Supports decimal precision (e.g., 4 decimals for sBTC amounts)
+- Easing function for smooth deceleration
+
+### 3b: AnimatedNumber Component
+- `src/components/AnimatedNumber.tsx` — wrapper component that uses `useCountUp` and an IntersectionObserver to trigger animation when scrolled into view
+- Props: `value`, `decimals`, `prefix`, `suffix`, `duration`
+- Only animates once (not on every re-render)
+
+### 3c: Integration
+- `src/components/dashboard/StatsCards.tsx` — replace static values with `AnimatedNumber`
+- `src/components/stream-detail/StreamQuickStats.tsx` — animate the stat values
+- `src/pages/Index.tsx` — animate the protocol stats in hero
+
+### Files created:
+- `src/hooks/use-count-up.ts`
+- `src/components/AnimatedNumber.tsx`
+
+### Files modified:
+- `src/components/dashboard/StatsCards.tsx`
+- `src/components/stream-detail/StreamQuickStats.tsx`
+- `src/pages/Index.tsx`
+
+---
+
+## Step 4: History Page
+
+Build a fully functional History page with filtering and stream display.
+
+### 4a: History Page (`src/pages/History.tsx`)
+- Header with title and description
+- Filter tabs: "All", "Completed", "Cancelled" using shadcn Tabs component
+- Stream count badge next to each tab label
+- Grid of StreamCard components filtered by selected tab
+- Empty state when no streams match the filter
+- Uses mock data filtered to completed + cancelled streams (and optionally active)
+
+### 4b: Optional Search/Sort
+- Simple text search input to filter by recipient/sender address
+- Sort dropdown: "Newest First", "Oldest First", "Highest Amount"
+
+### Files modified:
+- `src/pages/History.tsx` — full implementation replacing placeholder
+
+---
+
+## Summary of All File Changes
 
 | File | Action |
 |------|--------|
-| `src/lib/mock-data.ts` | Create - types + mock streams + helpers |
-| `src/lib/create-stream-schema.ts` | Create - Zod validation schemas |
-| `src/components/dashboard/StatsCards.tsx` | Create |
-| `src/components/StreamCard.tsx` | Create |
-| `src/components/create-stream/StepIndicator.tsx` | Create |
-| `src/components/create-stream/StepRecipient.tsx` | Create |
-| `src/components/create-stream/StepAmount.tsx` | Create |
-| `src/components/create-stream/StepDuration.tsx` | Create |
-| `src/components/create-stream/StepReview.tsx` | Create |
-| `src/components/stream-detail/StreamProgress.tsx` | Create |
-| `src/components/stream-detail/StreamDetailsCard.tsx` | Create |
-| `src/components/stream-detail/StreamQuickStats.tsx` | Create |
-| `src/components/stream-detail/StreamActions.tsx` | Create |
-| `src/components/stream-detail/TransactionHistory.tsx` | Create |
-| `src/pages/Dashboard.tsx` | Update - full dashboard |
-| `src/pages/CreateStream.tsx` | Update - multi-step form |
-| `src/pages/StreamDetail.tsx` | Update - full detail page |
+| `src/pages/Index.tsx` | Modify — use cases section, protocol stats, enhanced animations |
+| `src/components/dashboard/StatsCardsSkeleton.tsx` | Create — skeleton for stats cards |
+| `src/components/StreamCardSkeleton.tsx` | Create — skeleton for stream cards |
+| `src/components/stream-detail/StreamDetailSkeleton.tsx` | Create — skeleton for stream detail |
+| `src/hooks/use-simulated-loading.ts` | Create — loading simulation hook |
+| `src/hooks/use-count-up.ts` | Create — number animation hook |
+| `src/components/AnimatedNumber.tsx` | Create — animated number component |
+| `src/pages/Dashboard.tsx` | Modify — add skeletons + animated numbers |
+| `src/pages/StreamDetail.tsx` | Modify — add skeleton loading |
+| `src/components/dashboard/StatsCards.tsx` | Modify — use AnimatedNumber |
+| `src/components/stream-detail/StreamQuickStats.tsx` | Modify — use AnimatedNumber |
+| `src/pages/History.tsx` | Modify — full implementation with filters |
 
-No new dependencies required -- everything uses existing shadcn/ui components, React Hook Form, Zod, Framer Motion, and Lucide icons.
+No new dependencies required. Uses existing shadcn/ui Tabs, Skeleton, Accordion components and Framer Motion.
 
