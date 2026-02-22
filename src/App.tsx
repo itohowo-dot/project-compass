@@ -5,12 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "next-themes";
 import { WalletProvider } from "@/contexts/WalletContext";
-import Index from "./pages/Index";
-import Dashboard from "./pages/Dashboard";
-import CreateStream from "./pages/CreateStream";
-import StreamDetail from "./pages/StreamDetail";
-import History from "./pages/History";
-import NotFound from "./pages/NotFound";
+import { AnimatedRoutes } from "./components/AnimatedRoutes";
 
 const queryClient = new QueryClient();
 
@@ -22,14 +17,7 @@ const App = () => (
           <Toaster />
           <Sonner />
           <BrowserRouter>
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/create" element={<CreateStream />} />
-              <Route path="/stream/:id" element={<StreamDetail />} />
-              <Route path="/history" element={<History />} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
+            <AnimatedRoutes />
           </BrowserRouter>
         </WalletProvider>
       </TooltipProvider>
