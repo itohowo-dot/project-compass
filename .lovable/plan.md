@@ -1,24 +1,23 @@
 
 
-# Fix History Page Tabs on 390px Mobile
+# Fix History Page Tabs on 390px Mobile -- Take 3
 
 ## Problem
-The scrollable approach works functionally but produces a poor UX at 390px: the "All" tab scrolls off-screen to the left, "Cancelled" is still clipped, and a visible scrollbar appears.
+At 390px viewport width, there's roughly 358px of usable space. Four tabs ("All 5", "Active 3", "Completed 1", "Cancelled 1") with badges simply cannot fit -- each needs ~85-95px, totaling ~350-380px with gaps, causing overflow.
 
 ## Solution
-Use a two-pronged approach:
-1. **Hide the scrollbar** for cleaner appearance (CSS utility)
-2. **Reduce tab padding on mobile** so all 4 tabs fit without scrolling at 390px
-
-At 390px, roughly 358px of usable width is available (minus page padding). Each tab with badge needs about 85-90px. With `px-2` instead of `px-3` on mobile, all four tabs can fit in a single row without any scrolling.
+Use a combined approach:
+1. **Hide badges on mobile** -- badges are informative but not essential; removing them on narrow screens saves ~30px per tab
+2. **Keep reduced padding** (`px-2 sm:px-3`) to maximize space
+3. **Keep scrollbar hidden and overflow-x-auto** as a safety net for screens smaller than 390px
 
 ## Changes
 
 **File: `src/pages/History.tsx`** (lines 168-172)
-- Add `scrollbar-hide` class to `TabsList` to hide the scrollbar visually
-- Add responsive padding to each `TabsTrigger`: `px-2 sm:px-3` to give tabs slightly less horizontal padding on mobile, allowing all 4 to fit
+- Wrap each `Badge` inside the tabs with `hidden sm:inline-flex` so badges only appear on screens >= 640px
+- This reduces each tab to just the text label ("All", "Active", "Completed", "Cancelled"), which easily fits at 390px
 
-**File: `src/index.css`**
-- Add a `.scrollbar-hide` utility class (using `::-webkit-scrollbar` and `scrollbar-width: none`) so horizontal scroll areas don't show a scrollbar — useful across the app
+The tab text alone at `px-2` padding: ~40px + ~55px + ~85px + ~80px = ~260px, well within 358px.
 
-This keeps the scrollable fallback for screens narrower than 390px (e.g., 320px) while ensuring all tabs are visible without scrolling at 390px.
+On `sm:` and above, badges reappear and padding increases, restoring the full desktop experience.
+
