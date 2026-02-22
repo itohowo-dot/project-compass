@@ -1,52 +1,27 @@
 
-# Add Sparkle Micro-Animation on First Theme Toggle
 
-## Verification Results
-The theme preview card was verified on both desktop (1920px) and mobile (390px):
-- Entrance animation triggers correctly when scrolling into view (fade-up)
-- Pulsing ring hint visible before first click
-- Bouncing mouse pointer icon visible before first click
-- Click toggles between dark/light with smooth transitions
-- Both hint animations disappear after first click
-- Card scales on hover and tap
+# Improve Light Theme Contrast in ThemePreview
 
-No issues found.
+## Problem
+The light theme palette in the `ThemePreview` component uses colors that are too close in lightness, resulting in a washed-out appearance with poor visual separation between the background, card, border, and progress bar track.
 
----
-
-## Sparkle Animation on First Toggle
-
-### Overview
-When the user clicks the theme preview card for the very first time, spawn a burst of small sparkle particles that radiate outward from the card and fade away. This gives satisfying visual feedback and rewards the discovery of the interactive element. The sparkle only fires once (on the first click).
+## Changes
 
 ### File: `src/components/ThemePreview.tsx`
 
-**Changes:**
+Update the `LIGHT` constant (lines 5-16) with improved contrast values:
 
-1. Add a `showSparkles` state that briefly becomes `true` on first click, then resets after the animation completes (~600ms)
-2. When `showSparkles` is `true`, render 8-10 small sparkle dots using `motion.div` elements positioned absolutely around the card center
-3. Each sparkle particle:
-   - Starts at the card center (scale 0, opacity 1)
-   - Animates outward in a random radial direction (using pre-computed x/y offsets distributed evenly around a circle)
-   - Fades out (opacity 0) and scales down slightly
-   - Duration: ~500-600ms with staggered delays
-   - Color: uses the primary/amber color (`hsl(36 90% 54%)`) for consistency with the brand
-4. After the animation completes, `showSparkles` resets to `false` and the sparkle elements unmount via `AnimatePresence`
+| Token | Current | New | Reason |
+|-------|---------|-----|--------|
+| `bg` | `hsl(40 40% 96%)` | `hsl(40 30% 94%)` | Slightly darker background for better card separation |
+| `card` | `hsl(40 30% 100%)` | `hsl(0 0% 100%)` | Pure white card for clear contrast against bg |
+| `border` | `hsl(40 20% 88%)` | `hsl(40 15% 80%)` | Noticeably darker border for visible edges |
+| `muted` | `hsl(30 8% 55%)` | `hsl(30 10% 45%)` | Darker muted text for better readability |
+| `barBg` | `hsl(40 20% 90%)` | `hsl(40 15% 84%)` | Darker track so the amber bar stands out more |
 
-**Implementation approach:**
-- Define an array of 8 sparkle configs with pre-computed `x` and `y` end positions (evenly distributed in a circle, radius ~60px)
-- Map over this array inside an `AnimatePresence` block
-- Each sparkle is a small `motion.div` (6x6px rounded-full) with `initial`, `animate`, and `exit` props
-- Trigger via a `useEffect` that sets a timeout to clear `showSparkles` after 700ms
+The `text`, `bar`, and dot colors remain unchanged as they already have good contrast.
 
-### Technical Details
+## Impact
+- Only affects the self-contained mini preview card -- no effect on the actual app theme
+- All animations and interactions remain unchanged
 
-| Area | Detail |
-|------|--------|
-| File modified | `src/components/ThemePreview.tsx` |
-| New state | `showSparkles` boolean |
-| Particle count | 8 dots |
-| Animation duration | ~500ms per particle with slight stagger |
-| Trigger | First click only (when `hasClicked` transitions from false to true) |
-| Cleanup | Particles unmount after animation via timeout + AnimatePresence |
-| No new dependencies | Uses existing Framer Motion |
