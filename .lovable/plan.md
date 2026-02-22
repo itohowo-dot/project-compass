@@ -1,44 +1,31 @@
 
 
-# Add Pagination to Transaction Log
+# Add More Mock Transactions for Pagination Testing
 
 ## Overview
-Add pagination controls below the transaction table so that when there are many transactions, they are split into pages of 5 rows each. This keeps the table compact and scannable.
+Expand `mockTransactions` in `src/lib/mock-data.ts` from 9 to ~30 entries to properly test pagination with ellipsis behavior (6+ pages at 5 per page).
 
-## Verification Results
-- Both Streams and Transactions views render correctly on desktop and mobile (390px)
-- Type filtering (All/Created/Withdrawn/Cancelled) works correctly
-- Search and sort work for both views
-- On mobile, Counterparty column hides via `hidden sm:table-cell` as expected
-- Tx Hash column also hides on mobile -- table shows Type, Amount, Stream, and Date
+## Changes
 
-## Changes (single file: `src/pages/History.tsx`)
+### `src/lib/mock-data.ts`
+- Add ~21 new transaction entries to `mockTransactions`, bringing the total to 30
+- Transactions will be spread across the existing 5 streams (IDs "1" through "5")
+- Mix of all three types: `created`, `withdrawn`, `cancelled`
+- Varying amounts (0.01 - 1.0 sBTC), dates spanning Dec 2025 - Feb 2026, and sequential block heights
+- Unique tx hashes and IDs (t10 through t30)
 
-### 1. Add pagination state
-- New state: `const [txPage, setTxPage] = useState(1)`
-- Constant: `const TX_PER_PAGE = 5`
-- Reset page to 1 whenever filters change (txType, search, sort)
-
-### 2. Slice filtered transactions for current page
-- Derive `paginatedTxs = filteredTxs.slice((txPage - 1) * TX_PER_PAGE, txPage * TX_PER_PAGE)`
-- Derive `totalPages = Math.ceil(filteredTxs.length / TX_PER_PAGE)`
-- Render `paginatedTxs` in the table body instead of `filteredTxs`
-
-### 3. Add pagination controls below the table
-- Use the existing `Pagination` components from `src/components/ui/pagination.tsx`
-- Show: Previous button, page number buttons (with ellipsis for large page counts), Next button
-- Show a "Showing X-Y of Z transactions" label on the left
-- Hide pagination when total items fit on one page
-- Disable Previous on page 1, disable Next on last page
+### No other file changes needed
+- `History.tsx` already reads from `mockTransactions` and paginates at 5 per page
+- With 30 transactions, there will be 6 pages, which triggers the ellipsis logic in the pagination controls
 
 ## Technical Details
 
 | Area | Detail |
-|------|-----------|
-| Page size | 5 transactions per page |
-| Page reset | `useEffect` resets `txPage` to 1 when `txType`, `search`, or `sort` changes |
-| Pagination UI | Uses existing `Pagination`, `PaginationContent`, `PaginationItem`, `PaginationLink`, `PaginationPrevious`, `PaginationNext`, `PaginationEllipsis` components |
-| Page numbers | Show first page, last page, current page +/- 1, with ellipsis for gaps |
-| Import additions | `useEffect` from React, Pagination components from `@/components/ui/pagination` |
+|------|--------|
+| File | `src/lib/mock-data.ts` |
+| Current count | 9 transactions |
+| Target count | 30 transactions |
+| Pages at 5/page | 6 pages (triggers ellipsis) |
+| Stream distribution | Spread across streams 1-5 |
+| Type distribution | ~10 created, ~14 withdrawn, ~6 cancelled |
 
-No new files or dependencies needed.
