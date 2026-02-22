@@ -1,6 +1,7 @@
 import { Link, useLocation } from "react-router-dom";
 import { Droplets, LayoutDashboard, PlusCircle, Clock, Menu, X } from "lucide-react";
 import { WalletButton } from "./WalletButton";
+import { ThemeToggle } from "./ThemeToggle";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 
@@ -47,7 +48,8 @@ export function Navbar() {
             })}
           </nav>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
+            <ThemeToggle />
             <WalletButton />
             <button
               onClick={() => setMobileOpen(!mobileOpen)}

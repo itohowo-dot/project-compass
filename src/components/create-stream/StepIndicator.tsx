@@ -8,7 +8,7 @@ interface Props {
 
 export function StepIndicator({ currentStep }: Props) {
   return (
-    <div className="flex items-center justify-between mb-8">
+    <div className="flex items-center justify-between mb-8 gap-1 sm:gap-0">
       {steps.map((label, i) => {
         const step = i + 1;
         const isComplete = step < currentStep;
@@ -27,7 +27,7 @@ export function StepIndicator({ currentStep }: Props) {
               >
                 {isComplete ? <Check className="h-4 w-4" /> : step}
               </div>
-              <span className={`text-xs ${isCurrent ? "text-foreground font-medium" : "text-muted-foreground"}`}>
+              <span className={`text-[10px] sm:text-xs ${isCurrent ? "text-foreground font-medium" : "text-muted-foreground"}`}>
                 {label}
               </span>
             </div>
