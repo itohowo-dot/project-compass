@@ -198,19 +198,37 @@ export default function History() {
         {view === "transactions" && (
           <>
             {isLoading ? (
-              <div className="rounded-lg border border-border/50 overflow-hidden">
-                <div className="space-y-0">
+              <>
+                {/* Mobile skeleton */}
+                <div className="space-y-3 sm:hidden">
                   {[1, 2, 3, 4, 5].map((i) => (
-                    <div key={i} className="flex items-center gap-4 px-4 py-3 border-b border-border/50 last:border-0">
-                      <Skeleton className="h-5 w-20 rounded-full" />
-                      <Skeleton className="h-4 w-24" />
-                      <Skeleton className="h-4 w-16 hidden sm:block" />
-                      <Skeleton className="h-4 w-28 hidden sm:block" />
-                      <Skeleton className="h-4 w-24 ml-auto" />
+                    <div key={i} className="rounded-lg border border-border/50 p-4 space-y-3">
+                      <div className="flex items-center justify-between">
+                        <Skeleton className="h-5 w-20 rounded-full" />
+                        <Skeleton className="h-4 w-24" />
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <Skeleton className="h-4 w-16" />
+                        <Skeleton className="h-4 w-24" />
+                      </div>
                     </div>
                   ))}
                 </div>
-              </div>
+                {/* Desktop skeleton */}
+                <div className="hidden sm:block rounded-lg border border-border/50 overflow-hidden">
+                  <div className="space-y-0">
+                    {[1, 2, 3, 4, 5].map((i) => (
+                      <div key={i} className="flex items-center gap-4 px-4 py-3 border-b border-border/50 last:border-0">
+                        <Skeleton className="h-5 w-20 rounded-full" />
+                        <Skeleton className="h-4 w-24" />
+                        <Skeleton className="h-4 w-16" />
+                        <Skeleton className="h-4 w-28" />
+                        <Skeleton className="h-4 w-24 ml-auto" />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </>
             ) : filteredTxs.length > 0 ? (
               (() => {
                 const totalPages = Math.ceil(filteredTxs.length / TX_PER_PAGE);
@@ -234,14 +252,53 @@ export default function History() {
 
                 return (
               <div className="space-y-4">
-              <div className="rounded-lg border border-border/50 overflow-hidden">
+              {/* Mobile cards */}
+              <div className="sm:hidden rounded-lg border border-border/50 overflow-hidden">
+                {paginatedTxs.map((tx) => {
+                  const cfg = typeConfig[tx.type];
+                  const counterparty = tx.stream
+                    ? tx.stream.direction === "outgoing"
+                      ? tx.stream.recipient
+                      : tx.stream.sender
+                    : "—";
+                  return (
+                    <div key={tx.id} className="p-4 space-y-2 border-b border-border/50 last:border-0">
+                      <div className="flex items-center justify-between">
+                        <Badge variant="outline" className={cfg.className}>{cfg.label}</Badge>
+                        <span className="font-mono text-sm">{tx.amount.toFixed(4)} sBTC</span>
+                      </div>
+                      <div className="flex items-center justify-between text-sm">
+                        <Link to={`/stream/${tx.streamId}`} className="text-accent hover:underline">
+                          #{tx.streamId}
+                        </Link>
+                        <span className="text-muted-foreground">{format(new Date(tx.timestamp), "MMM d, yyyy")}</span>
+                      </div>
+                      <div className="flex items-center justify-between text-xs text-muted-foreground">
+                        <span>{counterparty !== "—" ? formatAddress(counterparty) : "—"}</span>
+                        <a
+                          href={`https://explorer.stacks.co/txid/${tx.txHash}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 text-accent hover:underline"
+                        >
+                          {tx.txHash.slice(0, 8)}…
+                          <ExternalLink className="h-3 w-3" />
+                        </a>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Desktop table */}
+              <div className="hidden sm:block rounded-lg border border-border/50 overflow-hidden">
                 <Table>
                   <TableHeader>
                     <TableRow>
                       <TableHead>Type</TableHead>
                       <TableHead>Amount</TableHead>
                       <TableHead>Stream</TableHead>
-                      <TableHead className="hidden sm:table-cell">Counterparty</TableHead>
+                      <TableHead>Counterparty</TableHead>
                       <TableHead>Date</TableHead>
                       <TableHead className="text-right">Tx Hash</TableHead>
                     </TableRow>
@@ -268,7 +325,7 @@ export default function History() {
                               #{tx.streamId}
                             </Link>
                           </TableCell>
-                          <TableCell className="hidden sm:table-cell text-muted-foreground text-sm">
+                          <TableCell className="text-muted-foreground text-sm">
                             {counterparty !== "—" ? formatAddress(counterparty) : "—"}
                           </TableCell>
                           <TableCell className="text-muted-foreground text-sm">
